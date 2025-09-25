@@ -2,41 +2,41 @@
 using namespace std;
 
 enum typeToken{
-    FUNCTION,
-    MAIN,
-    LET,
-    INT,
-    FLOAT,
-    CHAR,
-    IF,
-    ELSE,
-    WHILE,
-    PRINTLN,
-    RETURN,
-    LBRACKET,
-    RBRACKET,
-    LBRACE,
-    RBRACE,
-    ARROW,
-    COLON,
-    SEMICOLON,
-    COMMA,
-    ASSIGN,
-    EQ,
-    NE,
-    GT,
-    GE,
-    LT,
-    LE,
-    PLUS,
-    MINUS,
-    MULT,
-    DIV,
-    ID,
-    INT_CONST,
-    FLOAT_CONST,
-    CHAR_LITERAL,
-    FMT_STRING
+    FUNCTION = 0,
+    MAIN = 1,
+    LET = 2,
+    INT = 3,
+    FLOAT = 4,
+    CHAR = 5,
+    IF = 6,
+    ELSE = 7,
+    WHILE = 8,
+    PRINTLN = 9,
+    RETURN = 10,
+    LBRACKET = 11,
+    RBRACKET = 12,
+    LBRACE = 13,
+    RBRACE = 14,
+    ARROW = 15,
+    COLON = 16,
+    SEMICOLON = 17,
+    COMMA = 18,
+    ASSIGN = 19,
+    EQ = 20,
+    NE = 21,
+    GT = 22,
+    GE = 23,
+    LT = 24,
+    LE = 25,
+    PLUS = 26,
+    MINUS = 27,
+    MULT = 28,
+    DIV = 29,
+    ID = 30,
+    INT_CONST = 31,
+    FLOAT_CONST = 32,
+    CHAR_LITERAL = 33,
+    FMT_STRING = 34
 };
 
 struct token{
@@ -65,7 +65,7 @@ int main(){
     regex pattern2("[a-zA-Z0-9_]");
     regex pattern3("[0-9]");
     regex pattern4("[0-9.]");
-    regex alfabeto("[a-zA-Z0-9._(){}:;,+*/]");
+    
 
     while(arquivo.get(c)){
         string lexema = "";
