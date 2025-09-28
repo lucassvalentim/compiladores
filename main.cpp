@@ -27,9 +27,10 @@ int main(int argc, char *argv[]){
     std::vector<compiler::Token> tokens = lexer.tokenize();    
 
     for(auto t : tokens){
-        cout << "lexema: " << t.lexeme << endl;
-        cout << "Type token: " << (int)t.type << endl;
-        // cout << "line numb: " << t.lineNumber << endl;
+        cout << "lexema: " << '"' << t.lexeme << '"' << endl;
+        cout << "Type token: " << compiler::table_converter[(int)t.type] << endl;
+        cout << "line numb: " << t.lineNumber << endl;
+        cout << endl;
     }
 
     file.close();

@@ -21,16 +21,21 @@ namespace compiler {
         char c;
         std::string lexema;
         while(input.get(c)){
-            if(c == ' ' || c == '\n') continue;
+            if(c == ' ') continue;
+            if(c == '\n') {line_number++; continue;}
 
             lexema.push_back(c);
             if(!isalnum(c)){
-                // if c == ' (39 eh o inteiro do caracter ')
+                // 39 eh o inteiro do caracter
                 if(c == 39) {
+                    // desconsidera o caracter ' no lexema
+                    lexema.pop_back(); 
                     return isChar(lexema);
                 }
 
                 if(c == '"'){
+                    // desconsidera o caracter " no lexema
+                    lexema.pop_back(); 
                     return isString(lexema);
                 }
                 
@@ -47,98 +52,98 @@ namespace compiler {
 
         }
 
-        return makeToken(TokenType:: END_OF_FILE, "terminou", 0, 0);
+        return makeToken(TokenType:: END_OF_FILE, "EOF");
     }
     
     Token Lexer::punctuationOrOperator(std::string& lexema){
         if(lexema == "("){
-            return makeToken(TokenType:: LBRACKET, lexema, 0, 0);    
+            return makeToken(TokenType:: LBRACKET, lexema);    
         }
         if(lexema == ")"){
-            return makeToken(TokenType:: RBRACKET, lexema, 0, 0);
+            return makeToken(TokenType:: RBRACKET, lexema);
         }
         if(lexema == "{"){
-            return makeToken(TokenType:: LBRACE, lexema, 0, 0);
+            return makeToken(TokenType:: LBRACE, lexema);
         }
         if(lexema == "}"){
-            return makeToken(TokenType:: RBRACE, lexema, 0, 0);
+            return makeToken(TokenType:: RBRACE, lexema);
         }
         if(lexema == ":"){
-            return makeToken(TokenType:: COLON, lexema, 0, 0);
+            return makeToken(TokenType:: COLON, lexema);
         }
         if(lexema == ";"){
-            return makeToken(TokenType:: SEMICOLON, lexema, 0, 0);
+            return makeToken(TokenType:: SEMICOLON, lexema);
         }
         if(lexema == ","){
-            return makeToken(TokenType:: COMMA, lexema, 0, 0);
+            return makeToken(TokenType:: COMMA, lexema);
         }
         if(lexema == "+"){
-            return makeToken(TokenType:: PLUS, lexema, 0, 0);
+            return makeToken(TokenType:: PLUS, lexema);
         }
         if(lexema == "*"){
-            return makeToken(TokenType:: MULT, lexema, 0, 0);
+            return makeToken(TokenType:: MULT, lexema);
         }
         if(lexema == "/"){
-            return makeToken(TokenType:: DIV, lexema, 0, 0);
+            return makeToken(TokenType:: DIV, lexema);
         }
 
         if(lexema == "-"){
             char c; input.get(c); lexema.push_back(c);
             if(lexema == "->"){
-                return makeToken(TokenType:: ARROW, lexema, 0, 0);
+                return makeToken(TokenType:: ARROW, lexema);
             }else{
                 lexema.pop_back();
                 input.unget();
-                return makeToken(TokenType:: MINUS, lexema, 0, 0);
+                return makeToken(TokenType:: MINUS, lexema);
             }
             
         }
         if(lexema == "!"){
             char c; input.get(c); lexema.push_back(c);
             if(lexema == "!="){
-                return makeToken(TokenType:: NE, lexema, 0, 0);
+                return makeToken(TokenType:: NE, lexema);
             }else{
                 lexema.pop_back();
                 input.unget();
-                return makeToken(TokenType:: END_OF_FILE, "erro", 0, 0);
+                return makeToken(TokenType:: ERROR, "read ! and missing =");
             }
             
         }
         if(lexema == "="){
             char c; input.get(c); lexema.push_back(c);
             if(lexema == "=="){
-                return makeToken(TokenType:: EQ, lexema, 0, 0);
+                return makeToken(TokenType:: EQ, lexema);
             }else{
                 lexema.pop_back();
                 input.unget();
-                return makeToken(TokenType:: ASSIGN, lexema, 0, 0);
+                return makeToken(TokenType:: ASSIGN, lexema);
             }
                 
         }
         if(lexema == "<"){
             char c; input.get(c); lexema.push_back(c);
             if(lexema == "<="){
-                return makeToken(TokenType:: LE, lexema, 0, 0);
+                return makeToken(TokenType:: LE, lexema);
             }else{
                 lexema.pop_back();
                 input.unget();
-                return makeToken(TokenType:: LT, lexema, 0, 0);
+                return makeToken(TokenType:: LT, lexema);
             }
                 
         }
         if(lexema == ">"){
             char c; input.get(c); lexema.push_back(c);
             if(lexema == ">="){
-                return makeToken(TokenType:: GE, lexema, 0, 0);
+                return makeToken(TokenType:: GE, lexema);
             }else{
                 lexema.pop_back();
                 input.unget();
-                return makeToken(TokenType:: GT, lexema, 0, 0);
+                return makeToken(TokenType:: GT, lexema);
             }
                 
         }
 
-        return makeToken(TokenType:: END_OF_FILE, "erro", 0, 0);
+        return makeToken(TokenType:: ERROR, "ERROR in punctuation or Operator");
     }
 
     Token Lexer::identifierOrKeyword(std::string& lexema){
@@ -150,40 +155,40 @@ namespace compiler {
         input.unget();
         // block checks if it is a reserved word
         if(lexema == "fn"){
-            return makeToken(TokenType:: FUNCTION, lexema, 0, 0);
+            return makeToken(TokenType:: FUNCTION, lexema);
         }
         if(lexema == "main"){
-            return makeToken(TokenType:: MAIN, lexema, 0, 0);
+            return makeToken(TokenType:: MAIN, lexema);
         }
         if(lexema == "let"){
-            return makeToken(TokenType:: LET, lexema, 0, 0);
+            return makeToken(TokenType:: LET, lexema);
         }
         if(lexema == "int"){
-            return makeToken(TokenType:: INT, lexema, 0, 0);
+            return makeToken(TokenType:: INT, lexema);
         }
         if(lexema == "float"){
-            return makeToken(TokenType:: FLOAT, lexema, 0, 0);
+            return makeToken(TokenType:: FLOAT, lexema);
         }
         if(lexema == "char"){
-            return makeToken(TokenType:: CHAR, lexema, 0, 0);
+            return makeToken(TokenType:: CHAR, lexema);
         }
         if(lexema == "if"){
-            return makeToken(TokenType:: IF, lexema, 0, 0);
+            return makeToken(TokenType:: IF, lexema);
         }
         if(lexema == "else"){
-            return makeToken(TokenType:: ELSE, lexema, 0, 0);
+            return makeToken(TokenType:: ELSE, lexema);
         }
         if(lexema == "while"){
-            return makeToken(TokenType:: WHILE, lexema, 0, 0);
+            return makeToken(TokenType:: WHILE, lexema);
         }
         if(lexema == "println"){
-            return makeToken(TokenType:: PRINTLN, lexema, 0, 0);
+            return makeToken(TokenType:: PRINTLN, lexema);
         }
         if(lexema == "return"){
-            return makeToken(TokenType:: RETURN, lexema, 0, 0);
+            return makeToken(TokenType:: RETURN, lexema);
         }
 
-        return makeToken(TokenType:: ID, lexema, 0 , 0);
+        return makeToken(TokenType:: ID, lexema);
 
     }
 
@@ -200,32 +205,32 @@ namespace compiler {
                     lexema.push_back(c);
                 }while(input.get(c) && isdigit(c));
                 input.unget();
-                return makeToken(TokenType::FLOAT_CONST, lexema, 0, 0);
+                return makeToken(TokenType::FLOAT_CONST, lexema);
             }else{
-                return makeToken(TokenType::END_OF_FILE, "erro no float", 0, 0);
+                return makeToken(TokenType::ERROR, "Float erro");
             }
         }
     
         input.unget();
-        return makeToken(TokenType::INT_CONST, lexema, 0, 0);
+        return makeToken(TokenType::INT_CONST, lexema);
     }
 
     Token Lexer::isChar(std::string &lexema){
-        std::regex alfabeto("[a-zA-Z0-9._(){}:;,!><+\\-*/='\\\"]");
+        std::regex alfabeto("[a-zA-Z0-9._(){}:;,!><+\\-*/='\\\" ]");
 
         char c; input.get(c); lexema.push_back(c);
         if(std::regex_search(lexema.substr(lexema.size()-1, 1), alfabeto)){
-            input.get(c); lexema.push_back(c);
+            input.get(c);
             if(c == 39){
-                return makeToken(TokenType::CHAR_LITERAL, lexema, 0 , 0);
+                return makeToken(TokenType::CHAR_LITERAL, lexema);
             }else{
                 input.unget();
-                return makeToken(TokenType::END_OF_FILE, "erro na leitura do char", 0 , 0);
+                return makeToken(TokenType::ERROR, "char error");
             }
         }
 
         input.unget();
-        return makeToken(TokenType::END_OF_FILE, "erro na leitura do char", 0 , 0);
+        return makeToken(TokenType::ERROR, "char error");
     }
 
     Token Lexer::isString(std::string &lexema){
@@ -238,16 +243,15 @@ namespace compiler {
         }
 
         if(c == '"'){
-            lexema.push_back(c);
-            return makeToken(TokenType:: FMT_STRING, lexema, 0, 0);
+            return makeToken(TokenType:: FMT_STRING, lexema);
         }else{
             input.unget();
-            return makeToken(TokenType:: END_OF_FILE, "erro a ler a string", 0, 0);
+            return makeToken(TokenType:: ERROR, "string error");
         }
     }
 
-    Token Lexer::makeToken(TokenType type, std::string lexema, int start, int end){
-        return Token{type, lexema, line_number, start, end};
+    Token Lexer::makeToken(TokenType type, std::string lexema){
+        return Token{type, lexema, line_number};
     }
 
 }

@@ -24,7 +24,7 @@ namespace compiler{
             Token floatOrInteger(std::string &lexema);
             Token isChar(std::string &lexema);
             Token isString(std::string &lexema);
-            Token makeToken(TokenType type, std::string lexema, int start, int end);
+            Token makeToken(TokenType type, std::string lexema);
     };
 }
 
