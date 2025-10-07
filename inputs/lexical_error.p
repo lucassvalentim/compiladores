@@ -3,5 +3,5 @@ fn main(){
     b[] = 40;
     c = 39;
     $a = b - c;
-    print("{}", &a);
+    println("{}", &a);
 }

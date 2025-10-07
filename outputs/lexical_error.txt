@@ -1,0 +1,164 @@
+lexema: "fn"
+Token Type: FUNCTION
+Line Number: 1
+
+lexema: "main"
+Token Type: MAIN
+Line Number: 1
+
+lexema: "("
+Token Type: LBRACKET
+Line Number: 1
+
+lexema: ")"
+Token Type: RBRACKET
+Line Number: 1
+
+lexema: "{"
+Token Type: LBRACE
+Line Number: 1
+
+lexema: "let"
+Token Type: LET
+Line Number: 2
+
+lexema: "a"
+Token Type: ID
+Line Number: 2
+
+lexema: ","
+Token Type: COMMA
+Line Number: 2
+
+lexema: "b"
+Token Type: ID
+Line Number: 2
+
+lexema: ","
+Token Type: COMMA
+Line Number: 2
+
+lexema: "c"
+Token Type: ID
+Line Number: 2
+
+lexema: ":"
+Token Type: COLON
+Line Number: 2
+
+lexema: "int"
+Token Type: INT
+Line Number: 2
+
+lexema: ";"
+Token Type: SEMICOLON
+Line Number: 2
+
+lexema: "b"
+Token Type: ID
+Line Number: 3
+
+lexema: "ERROR in punctuation or Operator"
+Token Type: ERROR
+Line Number: 3
+
+lexema: "ERROR in punctuation or Operator"
+Token Type: ERROR
+Line Number: 3
+
+lexema: "="
+Token Type: ASSIGN
+Line Number: 3
+
+lexema: "40"
+Token Type: INT_CONST
+Line Number: 3
+
+lexema: ";"
+Token Type: SEMICOLON
+Line Number: 3
+
+lexema: "c"
+Token Type: ID
+Line Number: 4
+
+lexema: "="
+Token Type: ASSIGN
+Line Number: 4
+
+lexema: "39"
+Token Type: INT_CONST
+Line Number: 4
+
+lexema: ";"
+Token Type: SEMICOLON
+Line Number: 4
+
+lexema: "ERROR in punctuation or Operator"
+Token Type: ERROR
+Line Number: 5
+
+lexema: "a"
+Token Type: ID
+Line Number: 5
+
+lexema: "="
+Token Type: ASSIGN
+Line Number: 5
+
+lexema: "b"
+Token Type: ID
+Line Number: 5
+
+lexema: "-"
+Token Type: MINUS
+Line Number: 5
+
+lexema: "c"
+Token Type: ID
+Line Number: 5
+
+lexema: ";"
+Token Type: SEMICOLON
+Line Number: 5
+
+lexema: "println"
+Token Type: PRINTLN
+Line Number: 6
+
+lexema: "("
+Token Type: LBRACKET
+Line Number: 6
+
+lexema: "{}"
+Token Type: FMT_STRING
+Line Number: 6
+
+lexema: ","
+Token Type: COMMA
+Line Number: 6
+
+lexema: "ERROR in punctuation or Operator"
+Token Type: ERROR
+Line Number: 6
+
+lexema: "a"
+Token Type: ID
+Line Number: 6
+
+lexema: ")"
+Token Type: RBRACKET
+Line Number: 6
+
+lexema: ";"
+Token Type: SEMICOLON
+Line Number: 6
+
+lexema: "}"
+Token Type: RBRACE
+Line Number: 7
+
+lexema: "EOF"
+Token Type: END_OF_FILE
+Line Number: 7
+

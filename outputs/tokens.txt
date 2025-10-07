@@ -1,0 +1,140 @@
+lexema: "fn"
+Token Type: FUNCTION
+Line Number: 1
+
+lexema: "main"
+Token Type: MAIN
+Line Number: 1
+
+lexema: "let"
+Token Type: LET
+Line Number: 1
+
+lexema: "int"
+Token Type: INT
+Line Number: 1
+
+lexema: "float"
+Token Type: FLOAT
+Line Number: 1
+
+lexema: "char"
+Token Type: CHAR
+Line Number: 1
+
+lexema: "if"
+Token Type: IF
+Line Number: 1
+
+lexema: "else"
+Token Type: ELSE
+Line Number: 1
+
+lexema: "while"
+Token Type: WHILE
+Line Number: 1
+
+lexema: "println"
+Token Type: PRINTLN
+Line Number: 1
+
+lexema: "return"
+Token Type: RETURN
+Line Number: 1
+
+lexema: "("
+Token Type: LBRACKET
+Line Number: 3
+
+lexema: ")"
+Token Type: RBRACKET
+Line Number: 3
+
+lexema: "->"
+Token Type: ARROW
+Line Number: 3
+
+lexema: ":"
+Token Type: COLON
+Line Number: 3
+
+lexema: ","
+Token Type: COMMA
+Line Number: 3
+
+lexema: "{"
+Token Type: LBRACE
+Line Number: 3
+
+lexema: "}"
+Token Type: RBRACE
+Line Number: 3
+
+lexema: ";"
+Token Type: SEMICOLON
+Line Number: 3
+
+lexema: "="
+Token Type: ASSIGN
+Line Number: 5
+
+lexema: "=="
+Token Type: EQ
+Line Number: 5
+
+lexema: "!="
+Token Type: NE
+Line Number: 5
+
+lexema: ">"
+Token Type: GT
+Line Number: 5
+
+lexema: ">="
+Token Type: GE
+Line Number: 5
+
+lexema: "<"
+Token Type: LT
+Line Number: 5
+
+lexema: "<="
+Token Type: LE
+Line Number: 5
+
+lexema: "+"
+Token Type: PLUS
+Line Number: 5
+
+lexema: "-"
+Token Type: MINUS
+Line Number: 5
+
+lexema: "*"
+Token Type: MULT
+Line Number: 5
+
+lexema: "/"
+Token Type: DIV
+Line Number: 5
+
+lexema: "345"
+Token Type: INT_CONST
+Line Number: 7
+
+lexema: "234.56"
+Token Type: FLOAT_CONST
+Line Number: 7
+
+lexema: "a"
+Token Type: CHAR_LITERAL
+Line Number: 7
+
+lexema: "{}"
+Token Type: FMT_STRING
+Line Number: 7
+
+lexema: "EOF"
+Token Type: END_OF_FILE
+Line Number: 8
+

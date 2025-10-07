@@ -1,0 +1,240 @@
+lexema: "fn"
+Token Type: FUNCTION
+Line Number: 1
+
+lexema: "soma"
+Token Type: ID
+Line Number: 1
+
+lexema: "("
+Token Type: LBRACKET
+Line Number: 1
+
+lexema: "x"
+Token Type: ID
+Line Number: 1
+
+lexema: ":"
+Token Type: COLON
+Line Number: 1
+
+lexema: "int"
+Token Type: INT
+Line Number: 1
+
+lexema: ","
+Token Type: COMMA
+Line Number: 1
+
+lexema: "y"
+Token Type: ID
+Line Number: 1
+
+lexema: ":"
+Token Type: COLON
+Line Number: 1
+
+lexema: "int"
+Token Type: INT
+Line Number: 1
+
+lexema: ")"
+Token Type: RBRACKET
+Line Number: 1
+
+lexema: "->"
+Token Type: ARROW
+Line Number: 1
+
+lexema: "int"
+Token Type: INT
+Line Number: 1
+
+lexema: "{"
+Token Type: LBRACE
+Line Number: 1
+
+lexema: "return"
+Token Type: RETURN
+Line Number: 2
+
+lexema: "x"
+Token Type: ID
+Line Number: 2
+
+lexema: "+"
+Token Type: PLUS
+Line Number: 2
+
+lexema: "y"
+Token Type: ID
+Line Number: 2
+
+lexema: ";"
+Token Type: SEMICOLON
+Line Number: 2
+
+lexema: "}"
+Token Type: RBRACE
+Line Number: 3
+
+lexema: "fn"
+Token Type: FUNCTION
+Line Number: 5
+
+lexema: "main"
+Token Type: MAIN
+Line Number: 5
+
+lexema: "("
+Token Type: LBRACKET
+Line Number: 5
+
+lexema: ")"
+Token Type: RBRACKET
+Line Number: 5
+
+lexema: "{"
+Token Type: LBRACE
+Line Number: 5
+
+lexema: "let"
+Token Type: LET
+Line Number: 6
+
+lexema: "a"
+Token Type: ID
+Line Number: 6
+
+lexema: ","
+Token Type: COMMA
+Line Number: 6
+
+lexema: "b"
+Token Type: ID
+Line Number: 6
+
+lexema: ","
+Token Type: COMMA
+Line Number: 6
+
+lexema: "c"
+Token Type: ID
+Line Number: 6
+
+lexema: ":"
+Token Type: COLON
+Line Number: 6
+
+lexema: "int"
+Token Type: INT
+Line Number: 6
+
+lexema: ";"
+Token Type: SEMICOLON
+Line Number: 6
+
+lexema: "b"
+Token Type: ID
+Line Number: 7
+
+lexema: "="
+Token Type: ASSIGN
+Line Number: 7
+
+lexema: "40"
+Token Type: INT_CONST
+Line Number: 7
+
+lexema: ";"
+Token Type: SEMICOLON
+Line Number: 7
+
+lexema: "c"
+Token Type: ID
+Line Number: 8
+
+lexema: "="
+Token Type: ASSIGN
+Line Number: 8
+
+lexema: "39"
+Token Type: INT_CONST
+Line Number: 8
+
+lexema: ";"
+Token Type: SEMICOLON
+Line Number: 8
+
+lexema: "a"
+Token Type: ID
+Line Number: 9
+
+lexema: "="
+Token Type: ASSIGN
+Line Number: 9
+
+lexema: "soma"
+Token Type: ID
+Line Number: 9
+
+lexema: "("
+Token Type: LBRACKET
+Line Number: 9
+
+lexema: "b"
+Token Type: ID
+Line Number: 9
+
+lexema: ","
+Token Type: COMMA
+Line Number: 9
+
+lexema: "c"
+Token Type: ID
+Line Number: 9
+
+lexema: ")"
+Token Type: RBRACKET
+Line Number: 9
+
+lexema: ";"
+Token Type: SEMICOLON
+Line Number: 9
+
+lexema: "println"
+Token Type: PRINTLN
+Line Number: 10
+
+lexema: "("
+Token Type: LBRACKET
+Line Number: 10
+
+lexema: "{}"
+Token Type: FMT_STRING
+Line Number: 10
+
+lexema: ","
+Token Type: COMMA
+Line Number: 10
+
+lexema: "a"
+Token Type: ID
+Line Number: 10
+
+lexema: ")"
+Token Type: RBRACKET
+Line Number: 10
+
+lexema: ";"
+Token Type: SEMICOLON
+Line Number: 10
+
+lexema: "}"
+Token Type: RBRACE
+Line Number: 11
+
+lexema: "EOF"
+Token Type: END_OF_FILE
+Line Number: 12
+

@@ -6,6 +6,7 @@ namespace compiler {
 
     Lexer::Lexer(std::istream &in) : input(in), line_number(1) {}
     
+    // Main function that processes the entire input and returns all tokens
     std::vector<compiler::Token>  Lexer::tokenize(){
         std::vector<Token> tokens;
         while(true){
@@ -17,6 +18,7 @@ namespace compiler {
         return tokens;
     }
 
+    // Reads characters and decides which tokenization function to call based on the current character
     Token Lexer::nextToken(){
         char c;
         std::string lexema;
@@ -26,19 +28,20 @@ namespace compiler {
 
             lexema.push_back(c);
             if(!isalnum(c)){
-                // 39 eh o inteiro do caracter
+                // ASCII 39 corresponds to the single quote character (')
                 if(c == 39) {
-                    // desconsidera o caracter ' no lexema
+                    // Remove ' from lexeme before processing char literal
                     lexema.pop_back(); 
                     return isChar(lexema);
                 }
 
                 if(c == '"'){
-                    // desconsidera o caracter " no lexema
+                    // Remove " from lexeme before processing string literal
                     lexema.pop_back(); 
                     return isString(lexema);
                 }
                 
+                // Handle punctuation and operators
                 return punctuationOrOperator(lexema);
             }
             
@@ -87,6 +90,7 @@ namespace compiler {
             return makeToken(TokenType:: DIV, lexema);
         }
 
+        // Handles minus and arrow operator "->"
         if(lexema == "-"){
             char c; input.get(c); lexema.push_back(c);
             if(lexema == "->"){
@@ -98,6 +102,8 @@ namespace compiler {
             }
             
         }
+
+        // Handles "!" and "!="
         if(lexema == "!"){
             char c; input.get(c); lexema.push_back(c);
             if(lexema == "!="){
@@ -109,6 +115,8 @@ namespace compiler {
             }
             
         }
+
+        // Handles "=" and "=="
         if(lexema == "="){
             char c; input.get(c); lexema.push_back(c);
             if(lexema == "=="){
@@ -120,6 +128,8 @@ namespace compiler {
             }
                 
         }
+
+        // Handles "<" and "<="
         if(lexema == "<"){
             char c; input.get(c); lexema.push_back(c);
             if(lexema == "<="){
@@ -131,6 +141,8 @@ namespace compiler {
             }
                 
         }
+
+        // Handles ">" and ">="
         if(lexema == ">"){
             char c; input.get(c); lexema.push_back(c);
             if(lexema == ">="){
@@ -143,17 +155,20 @@ namespace compiler {
                 
         }
 
+        // Returns an error token if no valid punctuation/operator is found
         return makeToken(TokenType:: ERROR, "ERROR in punctuation or Operator");
     }
 
     Token Lexer::identifierOrKeyword(std::string& lexema){
         char c;
+        // Continue reading valid identifier characters
         while(input.get(c) && (isalnum(c) || c == '_')){
             lexema.push_back(c);
         }
 
-        input.unget();
-        // block checks if it is a reserved word
+        input.unget(); // Put back the last non-valid character
+
+        // Checks for reserved words
         if(lexema == "fn"){
             return makeToken(TokenType:: FUNCTION, lexema);
         }
@@ -188,6 +203,7 @@ namespace compiler {
             return makeToken(TokenType:: RETURN, lexema);
         }
 
+        // Default case: identifier
         return makeToken(TokenType:: ID, lexema);
 
     }
@@ -198,6 +214,7 @@ namespace compiler {
             lexema.push_back(c);
         }
 
+        // If a dot is found, try to read as float
         if(c == '.'){
             lexema.push_back(c); input.get(c);
             if(isdigit(c)){
@@ -207,11 +224,12 @@ namespace compiler {
                 input.unget();
                 return makeToken(TokenType::FLOAT_CONST, lexema);
             }else{
+                // Invalid float (dot not followed by a digit)
                 return makeToken(TokenType::ERROR, "Float erro");
             }
         }
     
-        input.unget();
+        input.unget(); // Revert last read character
         return makeToken(TokenType::INT_CONST, lexema);
     }
 
@@ -219,6 +237,7 @@ namespace compiler {
         std::regex alfabeto("[a-zA-Z0-9._(){}:;,!><+\\-*/='\\\" ]");
 
         char c; input.get(c); lexema.push_back(c);
+        // Checks if the character is valid according to regex
         if(std::regex_search(lexema.substr(lexema.size()-1, 1), alfabeto)){
             input.get(c);
             if(c == 39){
@@ -239,6 +258,7 @@ namespace compiler {
         char c;
         while(input.get(c) && c != '"'){
             lexema.push_back(c);
+            // Validate each character using regex
             if(!std::regex_search(lexema.substr(lexema.size()-1, 1), alfabeto)){lexema.pop_back(); break;}
         }
 
@@ -250,6 +270,7 @@ namespace compiler {
         }
     }
 
+    // Creates and returns a Token object with given type, lexeme, and current line number
     Token Lexer::makeToken(TokenType type, std::string lexema){
         return Token{type, lexema, line_number};
     }

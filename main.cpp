@@ -28,8 +28,8 @@ int main(int argc, char *argv[]){
 
     for(auto t : tokens){
         cout << "lexema: " << '"' << t.lexeme << '"' << endl;
-        cout << "Type token: " << compiler::table_converter[(int)t.type] << endl;
-        cout << "line numb: " << t.lineNumber << endl;
+        cout << "Token Type: " << compiler::table_converter[(int)t.type] << endl;
+        cout << "Line Number: " << t.lineNumber << endl;
         cout << endl;
     }
 
