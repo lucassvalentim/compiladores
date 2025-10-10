@@ -1,3 +1,8 @@
+# Nome dos participantes:
+
+    1) Lucas Henrique Valentim Rocha
+
+    2) Isabelle Cristine do Carmo Matos
 
 # Analisador Léxico — Linguagem P
 
