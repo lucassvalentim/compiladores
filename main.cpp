@@ -1,4 +1,5 @@
 #include "include/lexer.hpp"
+#include "include/parser.hpp"
 #include <istream>
 #include <iostream>
 #include <fstream>
@@ -26,13 +27,11 @@ int main(int argc, char *argv[]){
     compiler::Lexer lexer(file);
     std::vector<compiler::Token> tokens = lexer.tokenize();    
 
-    for(auto t : tokens){
-        cout << "lexema: " << '"' << t.lexeme << '"' << endl;
-        cout << "Token Type: " << compiler::table_converter[(int)t.type] << endl;
-        cout << "Line Number: " << t.lineNumber << endl;
-        cout << endl;
-    }
+    compiler::Parser parser(tokens);
+    parser.print_vecotr();
+    // cout << "index: " << parser.get_index() << '\n';
 
+    parser.initialize_parser();
     file.close();
 
     return 0;
