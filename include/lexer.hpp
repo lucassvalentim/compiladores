@@ -11,7 +11,6 @@ namespace compiler{
     class Lexer {
         public:
             Lexer(std::istream &in);
-            
             std::vector<Token> tokenize();
             
         private:

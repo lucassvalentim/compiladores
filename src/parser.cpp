@@ -9,7 +9,6 @@ namespace compiler {
     void Parser::initialize_parser(){
         this->programa();
     }
-    // Função que percorre o vetor de tokens
     void Parser::match(compiler::TokenType tok){
         if(tok == this->tokens[this->index].type){
             std::cout << "Token: " << compiler::table_converter[(int)tok] << " reconhecido na entrada\n";
@@ -92,7 +91,7 @@ namespace compiler {
     void Parser::bloco(){
         if(this->tokens[this->index].type == compiler::TokenType::LBRACE){
             this->match(compiler::TokenType::LBRACE);
-            this->sequencia();
+            this->sequencia();//1
             this->match(compiler::TokenType::RBRACE);
         }else if(!this->error){
             std::cout << "4 Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
@@ -103,7 +102,11 @@ namespace compiler {
         if(this->tokens[this->index].type == compiler::TokenType::LET){
             this->declaracao();
             this->sequencia();
-        }else if(this->tokens[this->index].type == compiler::TokenType::ID){
+        }else if(this->tokens[this->index].type == compiler::TokenType::ID ||
+                this->tokens[this->index].type == compiler::TokenType::IF  ||
+                this->tokens[this->index].type == compiler::TokenType::WHILE ||
+                this->tokens[this->index].type == compiler::TokenType::PRINTLN ||
+                this->tokens[this->index].type == compiler::TokenType::RETURN){
             this->comando();
             this->sequencia();
         }
@@ -147,7 +150,7 @@ namespace compiler {
             std::cout << "7 Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         }
-    }// até o comando estava funcionando.
+    }
     void Parser::comando(){
         if(this->tokens[this->index].type == compiler::TokenType::ID){
             this->match(compiler::TokenType::ID);
@@ -209,8 +212,193 @@ namespace compiler {
             this->comando_se();
         }
     }
-    // Falta implementar o expr;
-
+    void Parser::expr(){
+        if(this->tokens[this->index].type == compiler::TokenType::ID || 
+            this->tokens[this->index].type == compiler::TokenType::INT_CONST ||
+            this->tokens[this->index].type == compiler::TokenType::FLOAT_CONST ||
+            this->tokens[this->index].type == compiler::TokenType::CHAR_LITERAL ||
+            this->tokens[this->index].type == compiler::TokenType::LBRACKET){
+                this->rel();
+                this->expr_opc();
+        }else if(!this->error){
+            std::cout << "11 Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
+            this->tokens[this->index].lexeme << " nao esperado na entrada\n";
+        }
+    }
+    void Parser::expr_opc(){
+        if(this->tokens[this->index].type == compiler::TokenType::EQ ||
+            this->tokens[this->index].type == compiler::TokenType::NE){
+            this->op_igual();
+            this->rel();
+            this->expr_opc();
+        }
+    }
+    void Parser::op_igual(){
+        if(this->tokens[this->index].type == compiler::TokenType::EQ){
+            this->match(compiler::TokenType::EQ);
+        }else if(this->tokens[this->index].type == compiler::TokenType::NE){
+            this->match(compiler::TokenType::NE);
+        }else if(!this->error){
+            std::cout << "12 Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
+            this->tokens[this->index].lexeme << " nao esperado na entrada\n";
+        }
+    }
+    void Parser::rel(){
+        if(this->tokens[this->index].type == compiler::TokenType::ID || 
+            this->tokens[this->index].type == compiler::TokenType::INT_CONST ||
+            this->tokens[this->index].type == compiler::TokenType::FLOAT_CONST ||
+            this->tokens[this->index].type == compiler::TokenType::CHAR_LITERAL ||
+            this->tokens[this->index].type == compiler::TokenType::LBRACKET){
+                this->adicao();
+                this->rel_opc();
+        }else if(!this->error){
+            std::cout << "12 Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
+            this->tokens[this->index].lexeme << " nao esperado na entrada\n";
+        }
+    }
+    void Parser::rel_opc(){
+        if(this->tokens[this->index].type == compiler::TokenType::LT || 
+            this->tokens[this->index].type == compiler::TokenType::LE ||
+            this->tokens[this->index].type == compiler::TokenType::GT ||
+            this->tokens[this->index].type == compiler::TokenType::GE){
+                this->op_rel();
+                this->adicao();
+                this->rel_opc();
+            }
+    }
+    void Parser::op_rel(){
+        if(this->tokens[this->index].type == compiler::TokenType::LT){
+            this->match(compiler::TokenType::LT);
+        } else if(this->tokens[this->index].type == compiler::TokenType::LE){
+            this->match(compiler::TokenType::LE);
+        }else if(this->tokens[this->index].type == compiler::TokenType::GT){
+            this->match(compiler::TokenType::GT);
+        }else if(this->tokens[this->index].type == compiler::TokenType::GE){
+            this->match(compiler::TokenType::GE);
+        }else if(!this->error){
+            std::cout << "13 Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
+            this->tokens[this->index].lexeme << " nao esperado na entrada\n";
+        }
+    }
+    void Parser::adicao(){
+        if(this->tokens[this->index].type == compiler::TokenType::ID || 
+            this->tokens[this->index].type == compiler::TokenType::INT_CONST ||
+            this->tokens[this->index].type == compiler::TokenType::FLOAT_CONST ||
+            this->tokens[this->index].type == compiler::TokenType::CHAR_LITERAL ||
+            this->tokens[this->index].type == compiler::TokenType::LBRACKET){
+                this->termo();
+                this->adicao_opc();   
+        }else if(!this->error){
+            std::cout << "14 Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
+            this->tokens[this->index].lexeme << " nao esperado na entrada\n";
+        }       
+    }
+    void Parser::adicao_opc(){
+        if(this->tokens[this->index].type == compiler::TokenType::PLUS ||
+            this->tokens[this->index].type == compiler::TokenType::MINUS){
+                this->op_adicao();
+                this->termo();
+                this->adicao_opc();
+            }       
+    }
+    void Parser::op_adicao(){
+        if(this->tokens[this->index].type == compiler::TokenType::PLUS){
+            this->match(compiler::TokenType::PLUS);
+        }else if(this->tokens[this->index].type == compiler::TokenType::MINUS){
+            this->match(compiler::TokenType::MINUS);
+        }else if(!this->error){
+            std::cout << "15 Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
+            this->tokens[this->index].lexeme << " nao esperado na entrada\n";
+        } 
+    }
+    void Parser::termo(){
+        if(this->tokens[this->index].type == compiler::TokenType::ID || 
+            this->tokens[this->index].type == compiler::TokenType::INT_CONST ||
+            this->tokens[this->index].type == compiler::TokenType::FLOAT_CONST ||
+            this->tokens[this->index].type == compiler::TokenType::CHAR_LITERAL ||
+            this->tokens[this->index].type == compiler::TokenType::LBRACKET){
+                this->fator();
+                this->termo_opc();   
+        }else if(!this->error){
+            std::cout << "16 Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
+            this->tokens[this->index].lexeme << " nao esperado na entrada\n";
+        } 
+    }
+    void Parser::termo_opc(){
+        if(this->tokens[this->index].type == compiler::TokenType::MULT ||
+        this->tokens[this->index].type == compiler::TokenType::DIV){
+            this->op_mult();
+            this->fator();
+            this->termo_opc();
+        }
+    }
+    void Parser::op_mult(){
+        if(this->tokens[this->index].type == compiler::TokenType::MULT){
+            this->match(compiler::TokenType::MULT);
+        }else if(this->tokens[this->index].type == compiler::TokenType::DIV){
+            this->match(compiler::TokenType::DIV);
+        }else if(!this->error){
+            std::cout << "17 Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
+            this->tokens[this->index].lexeme << " nao esperado na entrada\n";
+        }
+    }
+    void Parser::fator(){
+        if(this->tokens[this->index].type == compiler::TokenType::ID){
+            this->match(compiler::TokenType::ID);
+            this->chamada_funcao();
+        }else if(this->tokens[this->index].type == compiler::TokenType::INT_CONST){
+          this->match(compiler::TokenType::INT_CONST);
+        }else if (this->tokens[this->index].type == compiler::TokenType::FLOAT_CONST){
+          this->match(compiler::TokenType::FLOAT_CONST);
+        }else if (this->tokens[this->index].type == compiler::TokenType::CHAR_LITERAL){
+          this->match(compiler::TokenType::CHAR_LITERAL);
+        }else if (this->tokens[this->index].type == compiler::TokenType::LBRACKET){
+            this->match(compiler::TokenType::LBRACKET);
+            this->expr();
+            this->match(compiler::TokenType::RBRACKET);
+        }else if(!this->error){
+            std::cout << "18 Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
+            this->tokens[this->index].lexeme << " nao esperado na entrada\n";
+        }
+    }
+    void Parser::chamada_funcao(){
+        if(this->tokens[this->index].type == compiler::TokenType::LBRACKET){
+            this->match(compiler::TokenType::LBRACKET);
+            this->lista_args();
+            this->match(compiler::TokenType::RBRACKET);
+        }
+    }
+    void Parser::lista_args(){
+        if(this->tokens[this->index].type == compiler::TokenType::ID ||
+            this->tokens[this->index].type == compiler::TokenType::INT_CONST ||
+            this->tokens[this->index].type == compiler::TokenType::FLOAT_CONST ||
+            this->tokens[this->index].type == compiler::TokenType::CHAR_LITERAL){
+                this->arg();
+                this->lista_args2();
+        }
+    }
+    void Parser::lista_args2(){
+        if(this->tokens[this->index].type == compiler::TokenType::COMMA){
+            this->match(compiler::TokenType::COMMA);
+            this->arg();
+            this->lista_args2();
+        }
+    }
+    void Parser::arg(){
+        if(this->tokens[this->index].type == compiler::TokenType::ID){
+            this->match(compiler::TokenType::ID);
+            this->chamada_funcao();
+        }else if(this->tokens[this->index].type == compiler::TokenType::INT_CONST){
+          this->match(compiler::TokenType::INT_CONST);
+        }else if (this->tokens[this->index].type == compiler::TokenType::FLOAT_CONST){
+          this->match(compiler::TokenType::FLOAT_CONST);
+        }else if (this->tokens[this->index].type == compiler::TokenType::CHAR_LITERAL){
+          this->match(compiler::TokenType::CHAR_LITERAL);
+        }else if(!this->error){
+            std::cout << "19 Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
+            this->tokens[this->index].lexeme << " nao esperado na entrada\n";
+        }
+    }
     void Parser::print_vecotr(){
         for(compiler::Token ti : tokens){
             std::cout << "lexema: " << '"' << ti.lexeme << '"' << '\n';
@@ -219,9 +407,4 @@ namespace compiler {
             std::cout << '\n';
         }
     }
-
-    // int Parser::get_index(){
-    //     return this->index;
-    // }
-
 }

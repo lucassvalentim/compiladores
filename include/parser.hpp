@@ -9,9 +9,7 @@ namespace compiler{
     class Parser {
         public:
             Parser(std::vector<compiler::Token> &t);
-            
             void print_vecotr();
-            // int get_index();
             void initialize_parser();
         private:
             std::vector<compiler::Token> tokens;
@@ -37,7 +35,22 @@ namespace compiler{
             void comando_se();
             void comando_senao();
             void expr();
+            void expr_opc();
+            void op_igual();
+            void rel();
+            void rel_opc();
+            void op_rel();
+            void adicao();
+            void adicao_opc();
+            void op_adicao();
+            void termo();
+            void termo_opc();
+            void op_mult();
+            void fator();
+            void chamada_funcao();
             void lista_args();
+            void lista_args2();
+            void arg();
     };
 }
 
