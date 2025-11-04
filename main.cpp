@@ -30,8 +30,9 @@ int main(int argc, char *argv[]){
     compiler::Parser parser(tokens);
     parser.print_vecotr();
     // cout << "index: " << parser.get_index() << '\n';
-
+    
     parser.initialize_parser();
+    // for(auto t :)
     file.close();
 
     return 0;

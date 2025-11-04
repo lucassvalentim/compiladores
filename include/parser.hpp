@@ -2,6 +2,7 @@
 #define PARSER_HPP
 
 #include "token.hpp"
+#include "symbol_table.hpp"
 #include <vector>
 #include <stdbool.h>
 
@@ -13,6 +14,7 @@ namespace compiler{
             void initialize_parser();
         private:
             std::vector<compiler::Token> tokens;
+            compiler::SymbolTableList symbol_table_list;
             size_t index;
             bool error;
             
