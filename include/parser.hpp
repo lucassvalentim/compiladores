@@ -17,7 +17,7 @@ namespace compiler{
             compiler::SymbolTableList symbol_table_list;
             size_t index;
             bool error;
-            
+
             void match(compiler::TokenType tok);
             void programa();
             void funcao_seq();

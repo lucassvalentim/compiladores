@@ -3,65 +3,67 @@
 
 #include <string>
 #include <vector>
-#include <set>
 #include <unordered_map>
+#include <optional>
 
 namespace compiler {
-
-    enum class DataTypes{
+    enum class DataType {
         ERROR = -1,
         INT = 0,
-        FLOAT = 1,
-        CHAR = 2,
-        VOID = 3
+        FLOAT,
+        CHAR,
+        VOID
     };
 
-    struct FunctionRegister{
-        std::string name_function;
-        size_t number_arguments;
-        std::vector<std::string> arguments;
-        
-        // Construtores
-        FunctionRegister();
-        FunctionRegister(std::string name_f, size_t num_args, const std::vector<std::string> &args);
-    };
-
-    struct DataTable{
+    struct FunctionRegister {
         std::string name;
-        DataTypes data_type;
-        bool is_parameter;
-        size_t parameter_position;
-        std::vector<FunctionRegister> functions_calls;
-        DataTypes return_type;
-
-        // Construtores
-        DataTable();
-        DataTable(std::string n, 
-        DataTypes dt, 
-        bool is_p, 
-        size_t param_pos);
+        std::vector<std::string> arguments; // nomes dos argumentos (ou tipos, dependendo do uso)
         
-        // Funções auxiliares
-        void add_call_ref(const FunctionRegister &call);
+        FunctionRegister() = default;
+        FunctionRegister(const std::string &name_f, const std::vector<std::string> &args)
+            : name(name_f), arguments(args) {}
+
+        size_t num_args() const { return arguments.size(); }
     };
 
-    class SymbolTable{
-        public:
-            void insert_data_table(const DataTable &t);
-            bool get_data_table(std::string &lexema, DataTable &t) const;
-            bool get_symbol_table(std::unordered_map<std::string, DataTable> &symbol_table) const;
-        private:
-            std::unordered_map<std::string, DataTable> symbol_table;
+    struct SymbolEntry {
+        std::string name;
+        DataType type;
+        bool is_parameter = false;
+        size_t parameter_position = 0;
+        DataType return_type;
+        std::vector<FunctionRegister> calls;
+
+        SymbolEntry() = default;
+        SymbolEntry(const std::string &n, 
+                    DataType dt, 
+                    bool is_p = false, 
+                    size_t param_pos = 0)
+            : name(n), type(dt), is_parameter(is_p), parameter_position(param_pos) {}
+
+        void add_function_call(const FunctionRegister &call) {
+            calls.push_back(call);
+        }
     };
 
-    class SymbolTableList{
-        public:
-            void insert_data_table(const SymbolTable &t, std::string name_function);
-            bool get_data_table(const std::string &name_function, SymbolTable &st) const;
-            std::unordered_map<std::string, SymbolTable> get_all();
-        private:
-            std::unordered_map<std::string, SymbolTable> symbol_table_list;
+    class SymbolTable {
+    public:
+        bool insert(const SymbolEntry &entry);
+        std::optional<SymbolEntry> find(const std::string &name) const;
+        const std::unordered_map<std::string, SymbolEntry>& get_all() const { return symbols_; }
+    private:
+        std::unordered_map<std::string, SymbolEntry> symbols_;
     };
+
+    class SymbolTableList {
+    public:
+        bool insert_table(const std::string &scope_name, const SymbolTable &table);
+        std::optional<SymbolTable> find_table(const std::string &scope_name) const;
+        const std::unordered_map<std::string, SymbolTable>& get_all() const { return tables_; }
+    private:
+        std::unordered_map<std::string, SymbolTable> tables_;
+    };
+
 }
 
 #endif

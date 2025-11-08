@@ -12,7 +12,7 @@ namespace compiler {
     }
     // Funcao que verifica a corretude do token
     void Parser::match(compiler::TokenType tok){
-        if(tok == this->tokens[this->index].type){
+        if(this->index < this->tokens.size() && tok == this->tokens[this->index].type){
             std::cout << "Token: " << compiler::table_converter[(int)tok] << " reconhecido na entrada\n";
             if(this->index + 1 < this->tokens.size())
             this->index++;
@@ -30,7 +30,14 @@ namespace compiler {
             this->funcao_seq();
             if(this->tokens[this->index].type == compiler::TokenType::END_OF_FILE){
                 match(compiler::TokenType::END_OF_FILE);
-                std::cout << "Fim da analise sintatica\n";
+                std::cout << "\nFim da analise sintatica\n";
+
+                std::cout << "\n==================== Tabela de simbolos ====================\n";
+                std::cout << "Existem " << this->symbol_table_list.get_all().size() << " tabelas de simbolos" << std::endl;
+                for(auto stl : this->symbol_table_list.get_all()){
+                    std::cout << "Tabela de simbolos da " << stl.first << ": []" << std::endl;
+                }
+                std::cout << "\n=============================================================\n";
             }
         }else if(!this->error){
             std::cout << "1 Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
@@ -45,11 +52,17 @@ namespace compiler {
     }
     void Parser::funcao(){
         if(this->tokens[this->index].type == compiler::TokenType::FUNCTION){
-            this->match(compiler::TokenType::FUNCTION);            
+            this->match(compiler::TokenType::FUNCTION);
+            compiler::SymbolTable st;
             
+            std::string scope_name = "";
+            if(this->index < this->tokens.size()){
+                scope_name = this->tokens[this->index].lexeme;
+            }
+            this->symbol_table_list.insert_table(scope_name, st);
+
             this->nome_funcao();
             this->match(compiler::TokenType::LBRACKET);
-            
             this->lista_params();
             this->match(compiler::TokenType::RBRACKET);
             this->tipo_retorno_funcao();
