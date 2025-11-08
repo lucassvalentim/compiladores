@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <set>
 #include <unordered_map>
 
 namespace compiler {
@@ -25,33 +26,39 @@ namespace compiler {
         FunctionRegister(std::string name_f, size_t num_args, const std::vector<std::string> &args);
     };
 
-    struct SymbolTable{
+    struct DataTable{
         std::string name;
         DataTypes data_type;
         bool is_parameter;
         size_t parameter_position;
-        std::vector<FunctionRegister> call_refs;
+        std::vector<FunctionRegister> functions_calls;
         DataTypes return_type;
 
         // Construtores
-        SymbolTable();
-        SymbolTable(std::string n, 
+        DataTable();
+        DataTable(std::string n, 
         DataTypes dt, 
         bool is_p, 
-        size_t param_pos,
-        DataTypes ret = DataTypes::VOID);
+        size_t param_pos);
         
         // Funções auxiliares
         void add_call_ref(const FunctionRegister &call);
-        void set_return_type(DataTypes rt);
-        DataTypes get_return_type() const;
+    };
+
+    class SymbolTable{
+        public:
+            void insert_data_table(const DataTable &t);
+            bool get_data_table(std::string &lexema, DataTable &t) const;
+            bool get_symbol_table(std::unordered_map<std::string, DataTable> &symbol_table) const;
+        private:
+            std::unordered_map<std::string, DataTable> symbol_table;
     };
 
     class SymbolTableList{
         public:
             void insert_data_table(const SymbolTable &t, std::string name_function);
-            bool get_data_table(const std::string &lexema, SymbolTable &t) const;
-            std::unordered_map<std::string, SymbolTable> get_all();
+            bool get_data_table(const std::string &lexema, SymbolTable &st) const;
+            std::unordered_map<std::string, DataTable> get_all();
         private:
             std::unordered_map<std::string, SymbolTable> symbol_table_list;
     };
