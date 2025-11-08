@@ -45,18 +45,15 @@ namespace compiler {
     }
     void Parser::funcao(){
         if(this->tokens[this->index].type == compiler::TokenType::FUNCTION){
-            this->match(compiler::TokenType::FUNCTION);
-            compiler::SymbolTable t;
-            std::string s = this->tokens[this->index].lexeme;
+            this->match(compiler::TokenType::FUNCTION);            
+            
             this->nome_funcao();
-            std::cout << "nome function: " << s << '\n';
             this->match(compiler::TokenType::LBRACKET);
+            
             this->lista_params();
             this->match(compiler::TokenType::RBRACKET);
             this->tipo_retorno_funcao();
             this->bloco();
-            this->symbol_table_list.insert_data_table(t, s);
-            std::cout << "size = " << symbol_table_list.get_all().size() << '\n';
         }else if(!this->error){
             std::cout << "2 Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";

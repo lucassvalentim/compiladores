@@ -57,8 +57,8 @@ namespace compiler {
     class SymbolTableList{
         public:
             void insert_data_table(const SymbolTable &t, std::string name_function);
-            bool get_data_table(const std::string &lexema, SymbolTable &st) const;
-            std::unordered_map<std::string, DataTable> get_all();
+            bool get_data_table(const std::string &name_function, SymbolTable &st) const;
+            std::unordered_map<std::string, SymbolTable> get_all();
         private:
             std::unordered_map<std::string, SymbolTable> symbol_table_list;
     };
