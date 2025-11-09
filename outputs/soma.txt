@@ -1,3 +1,5 @@
+-> Inicio da Analise Lexica:
+
 lexema: "fn"
 Token Type: FUNCTION
 Line Number: 1
@@ -238,3 +240,76 @@ lexema: "EOF"
 Token Type: END_OF_FILE
 Line Number: 12
 
+Fim da Analise Lexica
+
+-> Inicio da Analise Sintatica:
+
+Token: FUNCTION reconhecido na entrada
+Token: ID reconhecido na entrada
+Token: LBRACKET reconhecido na entrada
+Token: ID reconhecido na entrada
+Token: COLON reconhecido na entrada
+Token: INT reconhecido na entrada
+Token: COMMA reconhecido na entrada
+Token: ID reconhecido na entrada
+Token: COLON reconhecido na entrada
+Token: INT reconhecido na entrada
+Token: RBRACKET reconhecido na entrada
+Token: ARROW reconhecido na entrada
+Token: INT reconhecido na entrada
+Token: LBRACE reconhecido na entrada
+Token: RETURN reconhecido na entrada
+Token: ID reconhecido na entrada
+Token: PLUS reconhecido na entrada
+Token: ID reconhecido na entrada
+Token: SEMICOLON reconhecido na entrada
+Token: RBRACE reconhecido na entrada
+Token: FUNCTION reconhecido na entrada
+Token: MAIN reconhecido na entrada
+Token: LBRACKET reconhecido na entrada
+Token: RBRACKET reconhecido na entrada
+Token: LBRACE reconhecido na entrada
+Token: LET reconhecido na entrada
+Token: ID reconhecido na entrada
+Token: COMMA reconhecido na entrada
+Token: ID reconhecido na entrada
+Token: COMMA reconhecido na entrada
+Token: ID reconhecido na entrada
+Token: COLON reconhecido na entrada
+Token: INT reconhecido na entrada
+Token: SEMICOLON reconhecido na entrada
+Token: ID reconhecido na entrada
+Token: ASSIGN reconhecido na entrada
+Token: INT_CONST reconhecido na entrada
+Token: SEMICOLON reconhecido na entrada
+Token: ID reconhecido na entrada
+Token: ASSIGN reconhecido na entrada
+Token: INT_CONST reconhecido na entrada
+Token: SEMICOLON reconhecido na entrada
+Token: ID reconhecido na entrada
+Token: ASSIGN reconhecido na entrada
+Token: ID reconhecido na entrada
+Token: LBRACKET reconhecido na entrada
+Token: ID reconhecido na entrada
+Token: COMMA reconhecido na entrada
+Token: ID reconhecido na entrada
+Token: RBRACKET reconhecido na entrada
+Token: SEMICOLON reconhecido na entrada
+Token: PRINTLN reconhecido na entrada
+Token: LBRACKET reconhecido na entrada
+Token: FMT_STRING reconhecido na entrada
+Token: COMMA reconhecido na entrada
+Token: ID reconhecido na entrada
+Token: RBRACKET reconhecido na entrada
+Token: SEMICOLON reconhecido na entrada
+Token: RBRACE reconhecido na entrada
+Token: END_OF_FILE reconhecido na entrada
+
+Fim da Analise Sintatica
+
+==================== Tabela de simbolos ====================
+Existem 2 tabelas de simbolos
+Tabela de simbolos da main: []
+Tabela de simbolos da soma: []
+
+=============================================================

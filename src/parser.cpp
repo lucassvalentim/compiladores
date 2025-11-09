@@ -30,7 +30,7 @@ namespace compiler {
             this->funcao_seq();
             if(this->tokens[this->index].type == compiler::TokenType::END_OF_FILE){
                 match(compiler::TokenType::END_OF_FILE);
-                std::cout << "\nFim da analise sintatica\n";
+                std::cout << "\nFim da Analise Sintatica\n";
 
                 std::cout << "\n==================== Tabela de simbolos ====================\n";
                 std::cout << "Existem " << this->symbol_table_list.get_all().size() << " tabelas de simbolos" << std::endl;
@@ -40,7 +40,7 @@ namespace compiler {
                 std::cout << "\n=============================================================\n";
             }
         }else if(!this->error){
-            std::cout << "1 Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
+            std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         }
     }
@@ -53,14 +53,15 @@ namespace compiler {
     void Parser::funcao(){
         if(this->tokens[this->index].type == compiler::TokenType::FUNCTION){
             this->match(compiler::TokenType::FUNCTION);
+
+            // Criando a tabela de símbolos relacionado ao scopo da função atual
             compiler::SymbolTable st;
-            
             std::string scope_name = "";
             if(this->index < this->tokens.size()){
                 scope_name = this->tokens[this->index].lexeme;
             }
             this->symbol_table_list.insert_table(scope_name, st);
-
+            
             this->nome_funcao();
             this->match(compiler::TokenType::LBRACKET);
             this->lista_params();
@@ -68,7 +69,7 @@ namespace compiler {
             this->tipo_retorno_funcao();
             this->bloco();
         }else if(!this->error){
-            std::cout << "2 Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
+            std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         }
     }
@@ -78,7 +79,7 @@ namespace compiler {
         }else if(this->tokens[this->index].type == compiler::TokenType::MAIN){
             this->match(compiler::TokenType::MAIN);
         }else if(!this->error){
-            std::cout << "3 Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
+            std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         }
     }
@@ -111,7 +112,7 @@ namespace compiler {
             this->sequencia();//1
             this->match(compiler::TokenType::RBRACE);
         }else if(!this->error){
-            std::cout << "4 Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
+            std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         }
     }
@@ -136,7 +137,7 @@ namespace compiler {
             this->type();
             this->match(compiler::TokenType::SEMICOLON); 
         }else if(!this->error){
-            std::cout << "5 Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
+            std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         }
     }
@@ -145,7 +146,7 @@ namespace compiler {
             this->match(compiler::TokenType::ID);
             this->var_list2();
         }else if(!this->error){
-            std::cout << "6 Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
+            std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         }
     }
@@ -164,7 +165,7 @@ namespace compiler {
         }else if(this->tokens[this->index].type == compiler::TokenType::CHAR){
             this->match(compiler::TokenType::CHAR);
         }else if(!this->error){
-            std::cout << "7 Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
+            std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         }
     }
@@ -191,7 +192,7 @@ namespace compiler {
             this->expr();
             this->match(compiler::TokenType::SEMICOLON);
         }else if(!this->error){
-            std::cout << "8 Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
+            std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         }
     }
@@ -206,7 +207,7 @@ namespace compiler {
             this->match(compiler::TokenType::RBRACKET);
             this->match(compiler::TokenType::SEMICOLON);
         }else if(!this->error){
-            std::cout << "9 Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
+            std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         }
     }
@@ -219,7 +220,7 @@ namespace compiler {
         }else if(this->tokens[this->index].type == compiler::TokenType::LBRACE){
             this->bloco();
         }else if(!this->error){
-            std::cout << "10 Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
+            std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         }
     }
@@ -238,7 +239,7 @@ namespace compiler {
                 this->rel();
                 this->expr_opc();
         }else if(!this->error){
-            std::cout << "11 Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
+            std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         }
     }
@@ -256,7 +257,7 @@ namespace compiler {
         }else if(this->tokens[this->index].type == compiler::TokenType::NE){
             this->match(compiler::TokenType::NE);
         }else if(!this->error){
-            std::cout << "12 Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
+            std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         }
     }
@@ -269,7 +270,7 @@ namespace compiler {
                 this->adicao();
                 this->rel_opc();
         }else if(!this->error){
-            std::cout << "12 Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
+            std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         }
     }
@@ -293,7 +294,7 @@ namespace compiler {
         }else if(this->tokens[this->index].type == compiler::TokenType::GE){
             this->match(compiler::TokenType::GE);
         }else if(!this->error){
-            std::cout << "13 Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
+            std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         }
     }
@@ -306,7 +307,7 @@ namespace compiler {
                 this->termo();
                 this->adicao_opc();   
         }else if(!this->error){
-            std::cout << "14 Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
+            std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         }       
     }
@@ -324,7 +325,7 @@ namespace compiler {
         }else if(this->tokens[this->index].type == compiler::TokenType::MINUS){
             this->match(compiler::TokenType::MINUS);
         }else if(!this->error){
-            std::cout << "15 Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
+            std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         } 
     }
@@ -337,7 +338,7 @@ namespace compiler {
                 this->fator();
                 this->termo_opc();   
         }else if(!this->error){
-            std::cout << "16 Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
+            std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         } 
     }
@@ -355,7 +356,7 @@ namespace compiler {
         }else if(this->tokens[this->index].type == compiler::TokenType::DIV){
             this->match(compiler::TokenType::DIV);
         }else if(!this->error){
-            std::cout << "17 Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
+            std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         }
     }
@@ -374,7 +375,7 @@ namespace compiler {
             this->expr();
             this->match(compiler::TokenType::RBRACKET);
         }else if(!this->error){
-            std::cout << "18 Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
+            std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         }
     }
@@ -412,16 +413,8 @@ namespace compiler {
         }else if (this->tokens[this->index].type == compiler::TokenType::CHAR_LITERAL){
           this->match(compiler::TokenType::CHAR_LITERAL);
         }else if(!this->error){
-            std::cout << "19 Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
+            std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
-        }
-    }
-    void Parser::print_vecotr(){
-        for(compiler::Token ti : tokens){
-            std::cout << "lexema: " << '"' << ti.lexeme << '"' << '\n';
-            std::cout << "Token Type: " << compiler::table_converter[(int)ti.type] << '\n';
-            std::cout << "Line Number: " << ti.lineNumber << '\n';
-            std::cout << '\n';
         }
     }
 }

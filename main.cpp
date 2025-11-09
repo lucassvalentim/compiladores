@@ -28,12 +28,18 @@ int main(int argc, char *argv[]){
     std::vector<compiler::Token> tokens = lexer.tokenize();    
 
     compiler::Parser parser(tokens);
-    parser.print_vecotr();
-    // cout << "index: " << parser.get_index() << '\n';
+    std::cout << "-> Inicio da Analise Lexica:\n\n";
+    for(compiler::Token ti : tokens){
+            std::cout << "lexema: " << '"' << ti.lexeme << '"' << '\n';
+            std::cout << "Token Type: " << compiler::table_converter[(int)ti.type] << '\n';
+            std::cout << "Line Number: " << ti.lineNumber << '\n';
+            std::cout << '\n';
+        }
+    std::cout << "Fim da Analise Lexica\n\n";
     
+    std::cout << "-> Inicio da Analise Sintatica:\n\n";
     parser.initialize_parser();
-    // for(auto t :)
-    file.close();
 
+    file.close();
     return 0;
 }

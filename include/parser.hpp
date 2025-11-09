@@ -10,7 +10,6 @@ namespace compiler{
     class Parser {
         public:
             Parser(std::vector<compiler::Token> &t);
-            void print_vecotr();
             void initialize_parser();
         private:
             std::vector<compiler::Token> tokens;

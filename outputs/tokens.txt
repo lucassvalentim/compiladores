@@ -1,3 +1,5 @@
+-> Inicio da Analise Lexica:
+
 lexema: "fn"
 Token Type: FUNCTION
 Line Number: 1
@@ -138,3 +140,11 @@ lexema: "EOF"
 Token Type: END_OF_FILE
 Line Number: 8
 
+Fim da Analise Lexica
+
+-> Inicio da Analise Sintatica:
+
+Token: FUNCTION reconhecido na entrada
+Token: MAIN reconhecido na entrada
+Erro sintático. Token: LBRACKET nao esperado na entrada.
+Erro sintático. Token: RBRACKET nao esperado na entrada.

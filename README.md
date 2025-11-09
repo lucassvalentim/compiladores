@@ -4,9 +4,9 @@
 
     2) Isabelle Cristine do Carmo Matos
 
-# Analisador Léxico — Linguagem P
+# Analisador Léxico e Sintático — Linguagem P
 
-Este projeto implementa o **analisador léxico** de um compilador para a **linguagem P**.
+Este projeto implementa o **analisador léxico e sintático** de um compilador para a **linguagem P**.
 O analisador é responsável por identificar e classificar os tokens presentes no código-fonte, servindo como a primeira etapa do processo de compilação.
 
 ---

@@ -1,3 +1,5 @@
+-> Inicio da Analise Lexica:
+
 lexema: "fn"
 Token Type: FUNCTION
 Line Number: 1
@@ -194,3 +196,64 @@ lexema: "EOF"
 Token Type: END_OF_FILE
 Line Number: 9
 
+Fim da Analise Lexica
+
+-> Inicio da Analise Sintatica:
+
+Token: FUNCTION reconhecido na entrada
+Token: MAIN reconhecido na entrada
+Token: LBRACKET reconhecido na entrada
+Token: RBRACKET reconhecido na entrada
+Token: LBRACE reconhecido na entrada
+Token: LET reconhecido na entrada
+Token: ID reconhecido na entrada
+Token: COMMA reconhecido na entrada
+Token: ID reconhecido na entrada
+Token: COMMA reconhecido na entrada
+Token: ID reconhecido na entrada
+Token: COMMA reconhecido na entrada
+Token: ID reconhecido na entrada
+Token: COLON reconhecido na entrada
+Token: FLOAT reconhecido na entrada
+Token: SEMICOLON reconhecido na entrada
+Token: ID reconhecido na entrada
+Token: ASSIGN reconhecido na entrada
+Token: FLOAT_CONST reconhecido na entrada
+Token: SEMICOLON reconhecido na entrada
+Token: ID reconhecido na entrada
+Token: ASSIGN reconhecido na entrada
+Token: FLOAT_CONST reconhecido na entrada
+Token: SEMICOLON reconhecido na entrada
+Token: ID reconhecido na entrada
+Token: ASSIGN reconhecido na entrada
+Token: FLOAT_CONST reconhecido na entrada
+Token: SEMICOLON reconhecido na entrada
+Token: ID reconhecido na entrada
+Token: ASSIGN reconhecido na entrada
+Token: LBRACKET reconhecido na entrada
+Token: ID reconhecido na entrada
+Token: PLUS reconhecido na entrada
+Token: ID reconhecido na entrada
+Token: PLUS reconhecido na entrada
+Token: ID reconhecido na entrada
+Token: RBRACKET reconhecido na entrada
+Token: DIV reconhecido na entrada
+Token: FLOAT_CONST reconhecido na entrada
+Token: SEMICOLON reconhecido na entrada
+Token: PRINTLN reconhecido na entrada
+Token: LBRACKET reconhecido na entrada
+Token: FMT_STRING reconhecido na entrada
+Token: COMMA reconhecido na entrada
+Token: ID reconhecido na entrada
+Token: RBRACKET reconhecido na entrada
+Token: SEMICOLON reconhecido na entrada
+Token: RBRACE reconhecido na entrada
+Token: END_OF_FILE reconhecido na entrada
+
+Fim da Analise Sintatica
+
+==================== Tabela de simbolos ====================
+Existem 1 tabelas de simbolos
+Tabela de simbolos da main: []
+
+=============================================================
