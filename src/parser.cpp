@@ -26,16 +26,23 @@ namespace compiler {
     // Descida recursiva
     void Parser::programa(){
         if(this->tokens[this->index].type == compiler::TokenType::FUNCTION){
-            this->funcao();
-            this->funcao_seq();
+            std::cout << "entrou\n";
+            compiler::SymbolTable st = this->funcao();
+            this->funcao_seq(st);
             if(this->tokens[this->index].type == compiler::TokenType::END_OF_FILE){
                 match(compiler::TokenType::END_OF_FILE);
                 std::cout << "\nFim da Analise Sintatica\n";
-
+                
                 std::cout << "\n==================== Tabela de simbolos ====================\n";
                 std::cout << "Existem " << this->symbol_table_list.get_all().size() << " tabelas de simbolos" << std::endl;
                 for(auto stl : this->symbol_table_list.get_all()){
-                    std::cout << "Tabela de simbolos da " << stl.first << ": []" << std::endl;
+                    std::cout << "Tabela de simbolos da " << stl.first << ": " << std::endl;
+                    
+                    for(auto se : stl.second.get_all()){
+                        std::cout << "name: " << se.second.name << '\n' << "Type: " << int(se.second.type) << '\n' << "Is_param: " << se.second.is_parameter
+                        << '\n' << "parameter_position: " << se.second.parameter_position << '\n' << "Call refers: " << "NULL\n"; 
+                        std::cout << '\n';
+                    }
                 }
                 std::cout << "\n=============================================================\n";
             }
@@ -44,30 +51,50 @@ namespace compiler {
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         }
     }
-    void Parser::funcao_seq(){
+    void Parser::funcao_seq(compiler::SymbolTable &st){
         if(this->tokens[this->index].type == compiler::TokenType::FUNCTION){
             this->funcao();
-            this->funcao_seq();
+            this->funcao_seq(st);
         }
     }
-    void Parser::funcao(){
+    compiler::SymbolTable Parser::funcao(){
         if(this->tokens[this->index].type == compiler::TokenType::FUNCTION){
+            compiler::SymbolTable st; // Tabela local para cada funcao
             this->match(compiler::TokenType::FUNCTION);
 
-            // Criando a tabela de símbolos relacionado ao scopo da função atual
-            compiler::SymbolTable st;
+            // Recuperando o identificador relacionado a funcao
             std::string scope_name = "";
             if(this->index < this->tokens.size()){
                 scope_name = this->tokens[this->index].lexeme;
             }
-            this->symbol_table_list.insert_table(scope_name, st);
             
             this->nome_funcao();
             this->match(compiler::TokenType::LBRACKET);
-            this->lista_params();
+            
+            // Inserion a lista de parametros na tabela de simbolos
+            std::optional<std::vector<std::pair<std::string, compiler::DataType>>> list_ids = this->lista_params();
+            
+            if(!list_ids){
+                std::cout << "Erro ao inserir a lista de parametros\n";
+            }
+
+            int pos_param = 0;
+            for(auto ids : *list_ids){
+                std::cout << ids.first << ' ' << (int)ids.second << ' ' << pos_param << std::endl;
+                compiler::SymbolEntry se(ids.first, ids.second, true, pos_param);
+                pos_param = pos_param + 1;
+
+                st.insert(se);
+            }
+
             this->match(compiler::TokenType::RBRACKET);
             this->tipo_retorno_funcao();
-            this->bloco();
+            this->bloco(st);
+
+            // Adicionando a tabela de simbolos local na lista de tabelas de simbos.
+            this->symbol_table_list.insert_table(scope_name, st);
+            
+            return st;
         }else if(!this->error){
             std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
@@ -83,21 +110,40 @@ namespace compiler {
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         }
     }
-    void Parser::lista_params(){
+    std::optional<std::vector<std::pair<std::string, compiler::DataType>>> Parser::lista_params(){
+        std::vector<std::pair<std::string, compiler::DataType>> list_ids;
         if(this->tokens[this->index].type == compiler::TokenType::ID){
+
+            std::string id_lexeme = this->tokens[this->index].lexeme;
+            
             this->match(compiler::TokenType::ID);
             this->match(compiler::TokenType::COLON);
-            this->type();
-            this->lista_params2();
+            
+            compiler::DataType type_id = this->type();
+            list_ids.push_back(std::make_pair(id_lexeme, type_id));
+            
+            this->lista_params2(list_ids);
         }
+
+        if(list_ids.empty()){
+            return std::nullopt;
+        }
+
+        return list_ids;
     }
-    void Parser::lista_params2(){
+    void Parser::lista_params2(std::vector<std::pair<std::string, compiler::DataType>> &list_ids){
         if(this->tokens[this->index].type == compiler::TokenType::COMMA){
             this->match(compiler::TokenType::COMMA);
+        
+            std::string id_lexeme = this->tokens[this->index].lexeme;
+        
             this->match(compiler::TokenType::ID);   
             this->match(compiler::TokenType::COLON);
-            this->type();
-            this->lista_params2();
+            
+            compiler::DataType type_id = this->type();
+            list_ids.push_back(std::make_pair(id_lexeme, type_id));
+            
+            this->lista_params2(list_ids);
         }
     }
     void Parser::tipo_retorno_funcao(){
@@ -106,79 +152,114 @@ namespace compiler {
             this->type();
         }
     }
-    void Parser::bloco(){
+    void Parser::bloco(compiler::SymbolTable &st){
         if(this->tokens[this->index].type == compiler::TokenType::LBRACE){
             this->match(compiler::TokenType::LBRACE);
-            this->sequencia();//1
+            this->sequencia(st);//1
             this->match(compiler::TokenType::RBRACE);
         }else if(!this->error){
             std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         }
     }
-    void Parser::sequencia(){
+    void Parser::sequencia(compiler::SymbolTable &st){
         if(this->tokens[this->index].type == compiler::TokenType::LET){
-            this->declaracao();
-            this->sequencia();
+            this->declaracao(st);
+            this->sequencia(st);
         }else if(this->tokens[this->index].type == compiler::TokenType::ID ||
                 this->tokens[this->index].type == compiler::TokenType::IF  ||
                 this->tokens[this->index].type == compiler::TokenType::WHILE ||
                 this->tokens[this->index].type == compiler::TokenType::PRINTLN ||
                 this->tokens[this->index].type == compiler::TokenType::RETURN){
-            this->comando();
-            this->sequencia();
+            this->comando(st);
+            this->sequencia(st);
         }
     }
-    void Parser::declaracao(){
+    void Parser::declaracao(compiler::SymbolTable &st){
         if(this->tokens[this->index].type == compiler::TokenType::LET){
             this->match(compiler::TokenType::LET);
-            this->var_list();
+            
+            // recupera todos o ids
+            std::optional<std::vector<std::string>> list_ids = this->var_list();
             this->match(compiler::TokenType::COLON);
-            this->type();
-            this->match(compiler::TokenType::SEMICOLON); 
+
+            // recupera o tipo de todos os ids
+            compiler::DataType type_all_ids = this->type();
+            
+            if(!list_ids){
+                std::cout << "Erro ao declarar as variáveis\n";
+                return;
+            }
+
+            for(auto lexeme : *list_ids){
+                compiler::SymbolEntry se(lexeme, type_all_ids, false, -1);
+                st.insert(se);
+            }
+
+            this->match(compiler::TokenType::SEMICOLON);
         }else if(!this->error){
             std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         }
     }
-    void Parser::var_list(){
+    std::optional<std::vector<std::string>> Parser::var_list(){
+        std::vector<std::string> list_ids;
         if(this->tokens[this->index].type == compiler::TokenType::ID){
+            // Lista que armazenará todos os ids encontrados na declaracao
+            list_ids.push_back(this->tokens[this->index].lexeme);
+
             this->match(compiler::TokenType::ID);
-            this->var_list2();
+            this->var_list2(list_ids);
         }else if(!this->error){
             std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
-            this->tokens[this->index].lexeme << " nao esperado na entrada\n";
+            this->tokens[this->index].lexeme << " nao esperado na entrada\n";    
         }
+        
+        if(list_ids.empty()){
+            return std::nullopt;
+        }
+
+        return list_ids;
     }
-    void Parser::var_list2(){
+    void Parser::var_list2(std::vector<std::string> &list_ids){
         if(this->tokens[this->index].type == compiler::TokenType::COMMA){
             this->match(compiler::TokenType::COMMA);
+
+            // Lista que armazenará todos os ids encontrados na declaracao
+            list_ids.push_back(this->tokens[this->index].lexeme);
+
             this->match(compiler::TokenType::ID);
-            this->var_list2();
+            this->var_list2(list_ids);
         }
     }
-    void Parser::type(){
+    compiler::DataType Parser::type(){
+        compiler::DataType type_ids;
         if(this->tokens[this->index].type == compiler::TokenType::INT){
+            type_ids = compiler::DataType::INT;
             this->match(compiler::TokenType::INT);
         }else if(this->tokens[this->index].type == compiler::TokenType::FLOAT){
+            type_ids = compiler::DataType::FLOAT;
             this->match(compiler::TokenType::FLOAT);
         }else if(this->tokens[this->index].type == compiler::TokenType::CHAR){
+            type_ids = compiler::DataType::CHAR;
             this->match(compiler::TokenType::CHAR);
         }else if(!this->error){
             std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
+            type_ids = compiler::DataType::ERROR;
         }
+        return type_ids;
     }
-    void Parser::comando(){
+    void Parser::comando(compiler::SymbolTable &st){
         if(this->tokens[this->index].type == compiler::TokenType::ID){
             this->match(compiler::TokenType::ID);
             this->atribuicao_ou_chamada();
         }else if(this->tokens[this->index].type == compiler::TokenType::IF){
-            this->comando_se();
+            this->comando_se(st);
         }else if(this->tokens[this->index].type == compiler::TokenType::WHILE){
             this->match(compiler::TokenType::WHILE);
             this->expr();
-            this->bloco();
+            this->bloco(st);
         }else if(this->tokens[this->index].type == compiler::TokenType::PRINTLN){
             this->match(compiler::TokenType::PRINTLN);
             this->match(compiler::TokenType::LBRACKET);
@@ -211,23 +292,23 @@ namespace compiler {
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         }
     }
-    void Parser::comando_se(){
+    void Parser::comando_se(compiler::SymbolTable &st){
         if(this->tokens[this->index].type == compiler::TokenType::IF){
             this->match(compiler::TokenType::IF);
             this->expr();
-            this->bloco();
-            this->comando_senao();
+            this->bloco(st);
+            this->comando_senao(st);
         }else if(this->tokens[this->index].type == compiler::TokenType::LBRACE){
-            this->bloco();
+            this->bloco(st);
         }else if(!this->error){
             std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         }
     }
-    void Parser::comando_senao(){
+    void Parser::comando_senao(compiler::SymbolTable &st){
         if(this->tokens[this->index].type == compiler::TokenType::ELSE){
             this->match(compiler::TokenType::ELSE);
-            this->comando_se();
+            this->comando_se(st);
         }
     }
     void Parser::expr(){

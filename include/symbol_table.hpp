@@ -30,7 +30,7 @@ namespace compiler {
         std::string name;
         DataType type;
         bool is_parameter = false;
-        size_t parameter_position = 0;
+        int parameter_position = 0;
         DataType return_type;
         std::vector<FunctionRegister> calls;
 
@@ -38,7 +38,7 @@ namespace compiler {
         SymbolEntry(const std::string &n, 
                     DataType dt, 
                     bool is_p = false, 
-                    size_t param_pos = 0)
+                    int param_pos = -1)
             : name(n), type(dt), is_parameter(is_p), parameter_position(param_pos) {}
 
         void add_function_call(const FunctionRegister &call) {

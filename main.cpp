@@ -27,17 +27,17 @@ int main(int argc, char *argv[]){
     compiler::Lexer lexer(file);
     std::vector<compiler::Token> tokens = lexer.tokenize();    
 
-    compiler::Parser parser(tokens);
     std::cout << "-> Inicio da Analise Lexica:\n\n";
     for(compiler::Token ti : tokens){
-            std::cout << "lexema: " << '"' << ti.lexeme << '"' << '\n';
-            std::cout << "Token Type: " << compiler::table_converter[(int)ti.type] << '\n';
-            std::cout << "Line Number: " << ti.lineNumber << '\n';
-            std::cout << '\n';
-        }
+        std::cout << "lexema: " << '"' << ti.lexeme << '"' << '\n';
+        std::cout << "Token Type: " << compiler::table_converter[(int)ti.type] << '\n';
+        std::cout << "Line Number: " << ti.lineNumber << '\n';
+        std::cout << '\n';
+    }
     std::cout << "Fim da Analise Lexica\n\n";
     
     std::cout << "-> Inicio da Analise Sintatica:\n\n";
+    compiler::Parser parser(tokens);
     parser.initialize_parser();
 
     file.close();
