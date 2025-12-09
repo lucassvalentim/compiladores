@@ -2,7 +2,7 @@ CXXFLAGS = -g -O0 -Wall -Wextra
 
 all: main
 
-main: objects/main.o objects/lexer.o objects/token.o objects/parser.o objects/symbol_table.o
+main: objects/main.o objects/lexer.o objects/token.o objects/parser.o objects/symbol_table.o objects/asa.o
 	g++ $(CXXFLAGS) $^ -o main
 
 objects/main.o: main.cpp | objects
@@ -18,7 +18,10 @@ objects/parser.o: include/parser.hpp src/parser.cpp | objects
 	g++ $(CXXFLAGS) -c src/parser.cpp -o objects/parser.o
 
 objects/symbol_table.o: include/symbol_table.hpp src/symbol_table.cpp | objects
-	g++ $(CXXFLAGS)-c src/symbol_table.cpp -o objects/symbol_table.o
+	g++ $(CXXFLAGS) -c src/symbol_table.cpp -o objects/symbol_table.o
+
+objects/asa.o: include/asa.hpp src/asa.cpp | objects
+	g++ $(CXXFLAGS) -c src/asa.cpp -o objects/asa.o
 
 objects:
 	mkdir -p objects

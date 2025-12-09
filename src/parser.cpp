@@ -1,6 +1,7 @@
 #include "../include/parser.hpp"
 #include "../include/token.hpp"
 #include "../include/symbol_table.hpp"
+#include "../include/asa.hpp"
 #include <iostream>
 #include <iomanip>
 
@@ -109,13 +110,16 @@ namespace compiler {
         if(this->tokens[this->index].type == compiler::TokenType::FUNCTION){
             compiler::SymbolTable symbol_local_table; // Tabela local para cada funcao
             this->match(compiler::TokenType::FUNCTION);
-
+            
             // Recuperando o identificador relacionado a funcao
             std::string scope_name = "";
             if(this->index < this->tokens.size()){
                 scope_name = this->tokens[this->index].lexeme;
             }
             
+            // CRIAR NO DE FUNCAO
+            auto function_node = std::make_shared<FunctionNode>(scope_name);
+
             this->nome_funcao();
             this->match(compiler::TokenType::LBRACKET);
             
@@ -140,9 +144,12 @@ namespace compiler {
             
             this->bloco(symbol_local_table);
 
+            auto block_node = std::make_shared<BlockNode>();
+            function_node->add_child(block_node);
+
             // Adicionando a tabela de simbolos local na lista de tabelas de simbos.
             this->symbol_table_list.insert_table(scope_name, std::move(symbol_local_table));
-        
+            function_node->print(0);
         }else if(!this->error){
             std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
