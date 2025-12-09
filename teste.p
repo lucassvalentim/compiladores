@@ -1,4 +1,13 @@
-fn calculadora(op: char, y: float) -> float {
+fn maior(x: int, y: int) -> int {
+    if x < y {
+        return y;
+    }
+    else if x >= y{
+        return x;
+    }
+}
+
+fn calculadora(op: char, x: float, y: float) -> float {
     if op == '+' {
         return x + y;
     }
@@ -31,5 +40,10 @@ fn main(){
     b = 7.2;
     c = a + e;
     f = nome1 * 2;
+
+    maior(1, 2);
+    maior(4, 0);
+
     println("{}", calculadora('*', a, b));
+    println("{}", calculadora('+', a, b));
 }

@@ -1,6 +1,6 @@
 #ifndef SYMBOL_TABLE_HPP
 #define SYMBOL_TABLE_HPP
-#include <iostream>
+
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -48,7 +48,8 @@ namespace compiler {
         : name(std::move(other.name)),
         type(other.type),
         is_parameter(other.is_parameter),
-        parameter_position(other.parameter_position) {}
+        parameter_position(other.parameter_position),
+        calls(other.calls) {}
         
         // Operador de atribuição por movimento
         SymbolEntry& operator=(SymbolEntry&& other) noexcept {
@@ -88,11 +89,11 @@ namespace compiler {
                 return *this;
             }
             
-            // Construtor de movimento (opcional, mas recomendado para C++11+)
+            // Construtor de movimento
             SymbolTable(SymbolTable&& other) noexcept
                 : symbols_(std::move(other.symbols_)), return_type(std::move(other.return_type)) {}
             
-            // Operador de atribuição por movimento (opcional)
+            // Operador de atribuição por movimento
             SymbolTable& operator=(SymbolTable&& other) noexcept {
                 if (this != &other) {
                     symbols_ = std::move(other.symbols_);

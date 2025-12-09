@@ -2,9 +2,71 @@
 #include "../include/token.hpp"
 #include "../include/symbol_table.hpp"
 #include <iostream>
+#include <iomanip>
 
 namespace compiler {
     Parser::Parser(std::vector<compiler::Token> &t) : tokens(t), index(0), error(false) {}
+
+    // Funcao para imprimir o resultado final
+    void compiler::Parser::imprimir_parser(){
+        std::cout << "\n========================================\n";
+        std::cout << "   FIM DA ANALISE SINTATICA\n";
+        std::cout << "========================================\n\n";
+
+        std::cout << "╔════════════════════════════════════════╗\n";
+        std::cout << "║     TABELA DE SIMBOLOS - RESUMO       ║\n";
+        std::cout << "╚════════════════════════════════════════╝\n";
+        std::cout << "  Total de tabelas: " << this->symbol_table_list.get_all().size() << "\n\n";
+
+        for(auto stl : this->symbol_table_list.get_all()){
+            std::cout << "┌────────────────────────────────────────┐\n";
+            std::cout << "│ ESCOPO: " << std::left << std::setw(28) << stl.first << "│\n";
+            std::cout << "├────────────────────────────────────────┤\n";
+            
+            int symbol_count = 0;
+            for(auto se : stl.second.get_all()){
+                symbol_count++;
+                std::cout << "│ [" << symbol_count << "] " << std::left << std::setw(32) << se.second.name << "│\n";
+                std::cout << "│     Tipo: " << std::left << std::setw(27) << int(se.second.type) << "│\n";
+                std::cout << "│     Parametro: " << std::left << std::setw(22) << (se.second.is_parameter ? "Sim" : "Nao") << "│\n";
+                
+                if(se.second.is_parameter){
+                    std::cout << "│     Posicao param: " << std::left << std::setw(18) << se.second.parameter_position << "│\n";
+                }
+                
+                // Chamadas
+                if(se.second.calls.size() > 0){
+                    std::cout << "│                                        │\n";
+                    std::cout << "│     Chamadas referenciadas:            │\n";
+                    
+                    for(auto call : se.second.calls){
+                        std::cout << "│       -> " << std::left << std::setw(27) << call.name << "│\n";
+                        std::cout << "│          Args(" << call.num_args() << "): ";
+                        
+                        std::string args_str = "[";
+                        size_t i = 0;
+                        for(auto args : call.arguments){
+                            args_str += args;
+                            if(i < call.num_args() - 1) args_str += ", ";
+                            i++;
+                        }
+                        args_str += "]";
+                        
+                        std::cout << std::left << std::setw(18) << args_str << "│\n";
+                    }
+                }
+                
+                std::cout << "├────────────────────────────────────────┤\n";
+            }
+            
+            std::cout << "│ TIPO DE RETORNO: " << std::left << std::setw(20) << int(stl.second.get_return_type()) << "│\n";
+            std::cout << "└────────────────────────────────────────┘\n\n";
+        }
+
+        std::cout << "========================================\n";
+        std::cout << "   FIM DA TABELA DE SIMBOLOS\n";
+        std::cout << "========================================\n";
+    }
 
     // Inicializador do Parser
     void Parser::initialize_parser(){
@@ -31,21 +93,7 @@ namespace compiler {
             this->funcao_seq();
             if(this->tokens[this->index].type == compiler::TokenType::END_OF_FILE){
                 match(compiler::TokenType::END_OF_FILE);
-                std::cout << "\nFim da Analise Sintatica\n";
-                
-                std::cout << "\n==================== Tabela de simbolos ====================\n";
-                std::cout << "Existem " << this->symbol_table_list.get_all().size() << " tabelas de simbolos" << std::endl;
-                for(auto stl : this->symbol_table_list.get_all()){
-                    std::cout << "Tabela de simbolos da " << stl.first << ": " << std::endl;
-                    
-                    for(auto se : stl.second.get_all()){
-                        std::cout << "name: " << se.second.name << '\n' << "Type: " << int(se.second.type) << '\n' << "Is_param: " << se.second.is_parameter
-                        << '\n' << "parameter_position: " << se.second.parameter_position << '\n' << "Call refers: " << "NULL\n"; 
-                        std::cout << '\n';
-                    }
-                    std::cout << "\nreturn type: " << (int) stl.second.get_return_type() << std::endl;
-                }
-                std::cout << "\n=============================================================\n";
+                this->imprimir_parser();
             }
         }else if(!this->error){
             std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
@@ -90,7 +138,9 @@ namespace compiler {
 
             this->match(compiler::TokenType::RBRACKET);
 
+            // Recupera o tipo de retorno da funcao
             DataType return_type = this->tipo_retorno_funcao();
+            std::cout << "Foi pego o tipo de retorno da funcao\n";
             symbol_local_table.set_return_type(return_type);
             
             this->bloco(symbol_local_table);
@@ -266,8 +316,11 @@ namespace compiler {
             if(!symbol_local_table.find(this->tokens[this->index].lexeme)){
                 std::cout << "A variavel " << "'" << this->tokens[this->index].lexeme << "'" <<  " nao foi declarada ou passada por parametros\n";
             }
+
+            std::string id_lexeme = this->tokens[this->index].lexeme;
+            
             this->match(compiler::TokenType::ID);
-            this->atribuicao_ou_chamada(symbol_local_table);
+            this->atribuicao_ou_chamada(symbol_local_table, id_lexeme);
         }else if(this->tokens[this->index].type == compiler::TokenType::IF){
             this->comando_se(symbol_local_table);
         }else if(this->tokens[this->index].type == compiler::TokenType::WHILE){
@@ -275,11 +328,18 @@ namespace compiler {
             this->expr(symbol_local_table);
             this->bloco(symbol_local_table);
         }else if(this->tokens[this->index].type == compiler::TokenType::PRINTLN){
+            symbol_local_table.insert(
+                compiler::SymbolEntry(this->tokens[this->index].lexeme, compiler::DataType::VOID, false, -1)
+            );
+
             this->match(compiler::TokenType::PRINTLN);
             this->match(compiler::TokenType::LBRACKET);
             this->match(compiler::TokenType::FMT_STRING);
             this->match(compiler::TokenType::COMMA);
-            this->lista_args(symbol_local_table);
+
+            std::vector<std::string> arguments; // Lista de argumentos que sera passado para a funcao "println" 
+            this->lista_args(symbol_local_table, arguments);
+
             this->match(compiler::TokenType::RBRACKET);
             this->match(compiler::TokenType::SEMICOLON);
         }else if(this->tokens[this->index].type == compiler::TokenType::RETURN){
@@ -291,16 +351,51 @@ namespace compiler {
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         }
     }
-    void Parser::atribuicao_ou_chamada(compiler::SymbolTable &symbol_local_table){
+    void Parser::atribuicao_ou_chamada(compiler::SymbolTable &symbol_local_table, std::string &id_lexeme){
         if(this->tokens[this->index].type == compiler::TokenType::ASSIGN){
             this->match(compiler::TokenType::ASSIGN);
             this->expr(symbol_local_table);
             this->match(compiler::TokenType::SEMICOLON);
         }else if(this->tokens[this->index].type == compiler::TokenType::LBRACKET){
             this->match(compiler::TokenType::LBRACKET);
-            this->lista_args(symbol_local_table);
+
+            std::vector<std::string> arguments;
+            this->lista_args(symbol_local_table, arguments);
+
             this->match(compiler::TokenType::RBRACKET);
             this->match(compiler::TokenType::SEMICOLON);
+
+            std::cout << "\nQuantidade de arguementos da funcao " << id_lexeme << ": " << arguments.size() << std::endl;
+
+            // Criacao do function registe na funcao chamada
+            compiler::FunctionRegister function_register(id_lexeme, arguments);
+
+            // Recupera a tabela de simbolos da funcao chamada
+            std::optional<SymbolTable> temp_symbol_table = this->symbol_table_list.find_table(id_lexeme);
+            if(!temp_symbol_table){
+                std::cout << "Nao foi possivel recuperar a tabela de simbos\n";
+            }
+            
+             // Inserir na tabela a chamada de funcao
+            std::optional<compiler::SymbolEntry> symbol_entry = symbol_local_table.find(id_lexeme);
+            if(symbol_entry){
+                std::cout << "\nqtd3 call size: " << (*symbol_entry).calls.size() << '\n';
+               (*symbol_entry).add_function_call(function_register);
+                std::cout << "\nqtd4 call size: " << (*symbol_entry).calls.size() << '\n';
+               symbol_local_table.insert(
+                    std::move((*symbol_entry))
+                );
+                std::cout << "\nqtd5 call size: " << (*symbol_local_table.find(id_lexeme)).calls.size() << '\n';
+            }else{
+                compiler::SymbolEntry symbol_entry_local(id_lexeme, (*temp_symbol_table).get_return_type(), false, -1);
+                symbol_entry_local.add_function_call(function_register);
+                std::cout << "\nqtd1 call size: " << symbol_entry_local.calls.size() << '\n';
+                symbol_local_table.insert(
+                        std::move((symbol_entry_local))
+                );
+                std::cout << "\nqtd2 call size: " << (*symbol_local_table.find(id_lexeme)).calls.size() << '\n';
+                
+            }
         }else if(!this->error){
             std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
@@ -461,8 +556,11 @@ namespace compiler {
                 std::cout << "A variavel " << "'" << this->tokens[this->index].lexeme << "'" << " nao foi declarada nem passada por parametros\n";
             }
 
+            // lexema do id atual avaliado para verificao se eh ou nao uma funcao 
+            std::string id_lexeme = this->tokens[this->index].lexeme;
+
             this->match(compiler::TokenType::ID);
-            this->chamada_funcao(symbol_local_table);
+            this->chamada_funcao(symbol_local_table, id_lexeme);
         }else if(this->tokens[this->index].type == compiler::TokenType::INT_CONST){
           this->match(compiler::TokenType::INT_CONST);
         }else if (this->tokens[this->index].type == compiler::TokenType::FLOAT_CONST){
@@ -478,46 +576,99 @@ namespace compiler {
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         }
     }
-    void Parser::chamada_funcao(compiler::SymbolTable &symbol_local_table){
+    void Parser::chamada_funcao(compiler::SymbolTable &symbol_local_table, std::string &id_lexeme){
         if(this->tokens[this->index].type == compiler::TokenType::LBRACKET){
+            
             this->match(compiler::TokenType::LBRACKET);
-            this->lista_args(symbol_local_table);
+            
+            std::vector<std::string> arguments;
+            this->lista_args(symbol_local_table, arguments);
+            
             this->match(compiler::TokenType::RBRACKET);
+            
+            // Criar um function register;
+            compiler::FunctionRegister function_register(id_lexeme, arguments);
+            
+            // Recupera a tabela de simbolos da funcao chamada
+            std::optional<SymbolTable> temp_symbol_table = this->symbol_table_list.find_table(id_lexeme);
+            if(!temp_symbol_table){
+                std::cout << "Nao foi possivel recuperar a tabela de simbos\n";
+            }
+            
+            std::cout << "\nQuantidade de arguementos da funcao " << id_lexeme << ": " << arguments.size() << std::endl;
+            // Inserir na tabela a chamada de funcao
+            std::optional<compiler::SymbolEntry> symbol_entry = symbol_local_table.find(id_lexeme);
+            if(symbol_entry){
+                std::cout << "\nqtd3 call size: " << (*symbol_entry).calls.size() << '\n';
+               (*symbol_entry).add_function_call(function_register);
+                std::cout << "\nqtd4 call size: " << (*symbol_entry).calls.size() << '\n';
+               symbol_local_table.insert(
+                    std::move((*symbol_entry))
+                );
+                std::cout << "\nqtd5 call size: " << (*symbol_local_table.find(id_lexeme)).calls.size() << '\n';
+            }else{
+                compiler::SymbolEntry symbol_entry_local(id_lexeme, (*temp_symbol_table).get_return_type(), false, -1);
+                symbol_entry_local.add_function_call(function_register);
+                std::cout << "\nqtd1 call size: " << symbol_entry_local.calls.size() << '\n';
+                symbol_local_table.insert(
+                        std::move((symbol_entry_local))
+                );
+                std::cout << "\nqtd2 call size: " << (*symbol_local_table.find(id_lexeme)).calls.size() << '\n';
+                
+            }
         }
     }
-    void Parser::lista_args(compiler::SymbolTable &symbol_local_table){
+    void Parser::lista_args(compiler::SymbolTable &symbol_local_table, std::vector<std::string> &arguments){
         if(this->tokens[this->index].type == compiler::TokenType::ID ||
             this->tokens[this->index].type == compiler::TokenType::INT_CONST ||
             this->tokens[this->index].type == compiler::TokenType::FLOAT_CONST ||
             this->tokens[this->index].type == compiler::TokenType::CHAR_LITERAL){
-                this->arg(symbol_local_table);
-                this->lista_args2(symbol_local_table);
+                this->arg(symbol_local_table, arguments);
+                this->lista_args2(symbol_local_table, arguments);
         }
     }
-    void Parser::lista_args2(compiler::SymbolTable &symbol_local_table){
+    void Parser::lista_args2(compiler::SymbolTable &symbol_local_table, std::vector<std::string> &arguments){
         if(this->tokens[this->index].type == compiler::TokenType::COMMA){
             this->match(compiler::TokenType::COMMA);
-            this->arg(symbol_local_table);
-            this->lista_args2(symbol_local_table);
+            this->arg(symbol_local_table, arguments);
+            this->lista_args2(symbol_local_table, arguments);
         }
     }
-    void Parser::arg(compiler::SymbolTable &symbol_local_table){
+    void Parser::arg(compiler::SymbolTable &symbol_local_table, std::vector<std::string> &arguments){
+        std::string arg_lexeme = "";
         if(this->tokens[this->index].type == compiler::TokenType::ID){
             if(!symbol_local_table.find(this->tokens[this->index].lexeme)){
                 std::cout << "A variavel " << "'" << this->tokens[this->index].lexeme << "'" << " nao foi declarada nem passada por parametros\n";
             }
 
+            // lexema do id atual da chamada para possivel chamada de funcao 
+            std::string id_lexeme = this->tokens[this->index].lexeme;
+            
+            // Pegando o lexema do argumento atual
+            arg_lexeme = id_lexeme;
+
             this->match(compiler::TokenType::ID);
-            this->chamada_funcao(symbol_local_table);
+            this->chamada_funcao(symbol_local_table, id_lexeme);
         }else if(this->tokens[this->index].type == compiler::TokenType::INT_CONST){
-          this->match(compiler::TokenType::INT_CONST);
+            // Pegando o lexema do argumento atual
+            arg_lexeme = this->tokens[this->index].lexeme;
+
+            this->match(compiler::TokenType::INT_CONST);
         }else if (this->tokens[this->index].type == compiler::TokenType::FLOAT_CONST){
-          this->match(compiler::TokenType::FLOAT_CONST);
+            // Pegando o lexema do argumento atual
+            arg_lexeme = this->tokens[this->index].lexeme;
+          
+            this->match(compiler::TokenType::FLOAT_CONST);
         }else if (this->tokens[this->index].type == compiler::TokenType::CHAR_LITERAL){
-          this->match(compiler::TokenType::CHAR_LITERAL);
+            // Pegando o lexema do argumento atual
+            arg_lexeme = this->tokens[this->index].lexeme;
+          
+            this->match(compiler::TokenType::CHAR_LITERAL);
         }else if(!this->error){
             std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         }
+
+        arguments.push_back(arg_lexeme);
     }
 }
