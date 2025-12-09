@@ -288,8 +288,7 @@ namespace compiler {
     }
     void compiler::IdNode::print(int indent) const {
         auxiliary_printing_function::print_indent(indent);
-        std::cout << "● ID: " << name;
-        std::cout << " (tipo: " << auxiliary_printing_function::data_type_to_string(data_type) << ")\n";
+        std::cout << "● ID: " << name <<"\n";
     }
 
     int compiler::IntConstNode::get_value() const {

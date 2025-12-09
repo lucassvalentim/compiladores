@@ -5,13 +5,33 @@
 #include <iostream>
 #include <iomanip>
 
+namespace parser_auxiliary{
+    inline std::string data_type_to_string(compiler::DataType type) {
+        switch(type) {
+            case compiler::DataType::INT: return "int";
+            case compiler::DataType::FLOAT: return "float";
+            case compiler::DataType::CHAR: return "char";
+            default: return "void";
+        }
+    }
+
+    inline compiler::DataTypeASA convert_types(compiler::DataType type) {
+        switch(type) {
+            case compiler::DataType::INT: return compiler::DataTypeASA::INT;
+            case compiler::DataType::FLOAT: return compiler::DataTypeASA::FLOAT;
+            case compiler::DataType::CHAR: return compiler::DataTypeASA::CHAR;
+            default: return compiler::DataTypeASA::VOID;
+        }
+    }
+}
+
 namespace compiler {
     Parser::Parser(std::vector<compiler::Token> &t) : tokens(t), index(0), error(false) {}
-
+    
     // Funcao para imprimir o resultado final
-    void compiler::Parser::imprimir_parser(){
+    void compiler::Parser::imprimir_table_symbol(){
         std::cout << "\n========================================\n";
-        std::cout << "   FIM DA ANALISE SINTATICA\n";
+        std::cout << "        FIM DA ANALISE SINTATICA\n";
         std::cout << "========================================\n\n";
 
         std::cout << "╔════════════════════════════════════════╗\n";
@@ -28,7 +48,7 @@ namespace compiler {
             for(auto se : stl.second.get_all()){
                 symbol_count++;
                 std::cout << "│ [" << symbol_count << "] " << std::left << std::setw(32) << se.second.name << "│\n";
-                std::cout << "│     Tipo: " << std::left << std::setw(27) << int(se.second.type) << "│\n";
+                std::cout << "│     Tipo: " << std::left << std::setw(27) << parser_auxiliary::data_type_to_string(se.second.type) << "│\n";
                 std::cout << "│     Parametro: " << std::left << std::setw(22) << (se.second.is_parameter ? "Sim" : "Nao") << "│\n";
                 
                 if(se.second.is_parameter){
@@ -60,12 +80,30 @@ namespace compiler {
                 std::cout << "├────────────────────────────────────────┤\n";
             }
             
-            std::cout << "│ TIPO DE RETORNO: " << std::left << std::setw(20) << int(stl.second.get_return_type()) << "│\n";
+            std::cout << "│ TIPO DE RETORNO: " << std::left << std::setw(20) << parser_auxiliary::data_type_to_string((stl.second.get_return_type())) << "│\n";
             std::cout << "└────────────────────────────────────────┘\n\n";
         }
 
         std::cout << "========================================\n";
-        std::cout << "   FIM DA TABELA DE SIMBOLOS\n";
+        std::cout << "      FIM DA TABELA DE SIMBOLOS\n";
+        std::cout << "========================================\n";
+    }
+
+    void compiler::Parser::imprimir_ast(){
+        std::cout << "\n\n";
+
+        std::cout << "╔════════════════════════════════════════╗\n";
+        std::cout << "║     ARVORE SINTATICA ABSTRATA          ║\n";
+        std::cout << "╚════════════════════════════════════════╝\n";
+        
+        std::cout << "\n\n";
+        for(auto &ast : this->ast_list){
+            ast.second->print();
+            std::cout << "\n\n";
+        }
+                
+        std::cout << "========================================\n";
+        std::cout << "   FIM DA ARVORE SINTATICA ABSTRATA\n";
         std::cout << "========================================\n";
     }
 
@@ -93,7 +131,8 @@ namespace compiler {
             this->funcao_seq();
             if(this->tokens[this->index].type == compiler::TokenType::END_OF_FILE){
                 match(compiler::TokenType::END_OF_FILE);
-                this->imprimir_parser();
+                this->imprimir_table_symbol();
+                this->imprimir_ast();
             }
         }else if(!this->error){
             std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
@@ -141,13 +180,16 @@ namespace compiler {
             // Recupera o tipo de retorno da funcao
             DataType return_type = this->tipo_retorno_funcao();
             symbol_local_table.set_return_type(return_type);
+            function_node->set_data_type(parser_auxiliary::convert_types(return_type));
             
             auto block_node = this->bloco(symbol_local_table);
             function_node->add_child(block_node); // Imprime a arvore
 
             // Adicionando a tabela de simbolos local na lista de tabelas de simbos.
             this->symbol_table_list.insert_table(scope_name, std::move(symbol_local_table));
-            function_node->print(0);
+            
+            // Adiciona a arvore de sintaxe abstrata local na lista das arvores
+            this->ast_list[scope_name] = function_node;
         }else if(!this->error){
             std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
@@ -214,7 +256,6 @@ namespace compiler {
             this->match(compiler::TokenType::LBRACE);
             this->sequencia(symbol_local_table, block_node);
             this->match(compiler::TokenType::RBRACE);
-            std::cout << "Voltou do else com: " << block_node->get_childrens().size() << std::endl;
         }else if(!this->error){
             std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
@@ -235,9 +276,6 @@ namespace compiler {
             auto comando_node = this->comando(symbol_local_table);
             if(comando_node){
                 block_node->add_statement(comando_node);
-                comando_node->print();
-            }else{
-                std::cout << "Deu falha no  comando.\n";
             }
 
             this->sequencia(symbol_local_table, block_node);
@@ -279,7 +317,7 @@ namespace compiler {
         std::vector<std::string> list_ids;
         if(this->tokens[this->index].type == compiler::TokenType::ID){
 
-            // Lista que armazenará todos os ids encontrados na declaracao
+            // Lista que armazenara todos os ids encontrados na declaracao
             list_ids.push_back(this->tokens[this->index].lexeme);
 
             this->match(compiler::TokenType::ID);
@@ -329,12 +367,8 @@ namespace compiler {
             std::string id_lexeme = this->tokens[this->index].lexeme;
             this->match(compiler::TokenType::ID);
 
-            // No para criacao da chamada ou atribuicao para ASA
+            // No para criacao de chamada de funcao ou atribuicao
             auto call_or_assign_node =  this->atribuicao_ou_chamada(symbol_local_table, id_lexeme);
-            if(call_or_assign_node)
-                call_or_assign_node->print();
-            else
-                std::cout << "problemas com atribuicao\n";
             
             return call_or_assign_node;
         }else if(this->tokens[this->index].type == compiler::TokenType::IF){
@@ -362,14 +396,13 @@ namespace compiler {
             std::vector<std::shared_ptr<ASTNode>> argument_nodes; 
             this->lista_args(symbol_local_table, arguments, argument_nodes);
 
-            // Adicionando o comando PRINTLN na arvore
+            // Adiciona o comando PRINTLN na arvore
             auto println_node = std::make_shared<compiler::PrintNode>();
             
-            // Adicionar os argumentos da chamda de funcao
+            // Adiciona os argumentos da chamda de funcao
             for(auto child : argument_nodes){
                 println_node->set_argument(child);
             }
-
 
             this->match(compiler::TokenType::RBRACKET);
             this->match(compiler::TokenType::SEMICOLON);
@@ -426,21 +459,17 @@ namespace compiler {
             // Criacao do function registe na funcao chamada
             compiler::FunctionRegister function_register(id_lexeme, arguments);
 
-            // Recupera a tabela de simbolos da funcao chamada
-            std::optional<SymbolTable> temp_symbol_table = this->symbol_table_list.find_table(id_lexeme);
-            if(!temp_symbol_table){
-                std::cout << "Nao foi possivel recuperar a tabela de simbos\n";
-            }
-            
-             // Inserir na tabela a chamada de funcao
+            // Inserir na tabela a chamada de funcao
             std::optional<compiler::SymbolEntry> symbol_entry = symbol_local_table.find(id_lexeme);
             if(symbol_entry){
-               (*symbol_entry).add_function_call(function_register);
-               symbol_local_table.insert(
+                (*symbol_entry).add_function_call(function_register);
+                symbol_local_table.insert(
                     std::move((*symbol_entry))
                 );
-                
             }else{
+                // Recupera a tabela de simbolos da funcao chamada
+                std::optional<SymbolTable> temp_symbol_table = this->symbol_table_list.find_table(id_lexeme);
+                // Cria um entrada para inserir na tabela de simbolos
                 compiler::SymbolEntry symbol_entry_local(id_lexeme, (*temp_symbol_table).get_return_type(), false, -1);
                 symbol_entry_local.add_function_call(function_register);
                 symbol_local_table.insert(
@@ -500,13 +529,6 @@ namespace compiler {
             this->tokens[this->index].type == compiler::TokenType::LBRACKET){
                 leaf_knot = this->rel(symbol_local_table);
                 leaf_knot = this->expr_opc(symbol_local_table, leaf_knot);
-
-                if(!leaf_knot){
-                    std::cout << "nos vazios\n";
-                }
-                else{
-                    leaf_knot->print();
-                }
         }else if(!this->error){
             std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
@@ -519,7 +541,8 @@ namespace compiler {
             this->tokens[this->index].type == compiler::TokenType::NE){
             auto rel_knot = std::make_shared<compiler::RelOp>(this->tokens[this->index].lexeme);
             this->op_igual();
-
+            
+            // Recupera o operando da direita
             std::shared_ptr<compiler::ASTNode> right_leaf_knot = this->rel(symbol_local_table);;
             rel_knot->set_operands(left_leaf_knot, right_leaf_knot);
 
@@ -547,13 +570,6 @@ namespace compiler {
             this->tokens[this->index].type == compiler::TokenType::LBRACKET){
                 leaf_knot = this->adicao(symbol_local_table);
                 leaf_knot = this->rel_opc(symbol_local_table, leaf_knot);
-
-                if(!leaf_knot){
-                    std::cout << "nos vazios\n";
-                }
-                else{
-                    leaf_knot->print();
-                }
         }else if(!this->error){
             std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
@@ -568,11 +584,11 @@ namespace compiler {
             this->tokens[this->index].type == compiler::TokenType::GE){
                 auto rel_knot = std::make_shared<compiler::RelOp>(this->tokens[this->index].lexeme);
                 this->op_rel();
-
+                
+                // Recupera o operando da direita
                 std::shared_ptr<compiler::ASTNode> right_leaf_knot = this->adicao(symbol_local_table);
                 rel_knot->set_operands(left_leaf_knot, right_leaf_knot);
 
-                
                 return this->rel_opc(symbol_local_table, rel_knot);
             }
 
@@ -601,14 +617,6 @@ namespace compiler {
             this->tokens[this->index].type == compiler::TokenType::LBRACKET){
                 leaf_knot = this->termo(symbol_local_table);
                 leaf_knot = this->adicao_opc(symbol_local_table, leaf_knot);
-
-                if(!leaf_knot){
-                    std::cout << "nos vazios\n";
-                }
-                else{
-                    leaf_knot->print();
-                }
-
         }else if(!this->error){
             std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
@@ -622,6 +630,7 @@ namespace compiler {
                 auto arithmetic_knot = std::make_shared<compiler::AritOp>(this->tokens[this->index].lexeme);
                 this->op_adicao();
                 
+                // Recupera o operando da direita
                 std::shared_ptr<compiler::ASTNode> right_leaf_knot = this->termo(symbol_local_table);
                 arithmetic_knot->set_operands(left_leaf_knot, right_leaf_knot);
                 
@@ -662,6 +671,7 @@ namespace compiler {
             auto arithmetic_knot = std::make_shared<compiler::AritOp>(this->tokens[this->index].lexeme);
             this->op_mult();
             
+            // Recupera o operando da direita
             std::shared_ptr<compiler::ASTNode> right_leaf_knot = this->fator(symbol_local_table);
             arithmetic_knot->set_operands(left_leaf_knot, right_leaf_knot);
 
@@ -718,33 +728,30 @@ namespace compiler {
             std::vector<std::shared_ptr<ASTNode>> argument_nodes;
             this->lista_args(symbol_local_table, arguments, argument_nodes);
 
-             // Criar o node de chamada de funcao
+            // Cria o node de chamada de funcao
             auto call_node = std::make_shared<CallNode>(id_lexeme);
             
-            // Adicionar os argumentos da chamda de funcao
+            // Adiciona os argumentos da chamda de funcao
             for(auto child : argument_nodes){
                 call_node->add_argument(child);
             }
             
             this->match(compiler::TokenType::RBRACKET);
             
-            // Criar um function register;
+            // Cria um function register;
             compiler::FunctionRegister function_register(id_lexeme, arguments);
-            
-            // Recupera a tabela de simbolos da funcao chamada
-            std::optional<SymbolTable> temp_symbol_table = this->symbol_table_list.find_table(id_lexeme);
-            if(!temp_symbol_table){
-                std::cout << "Nao foi possivel recuperar a tabela de simbos\n";
-            }
             
             // Inserir na tabela a chamada de funcao
             std::optional<compiler::SymbolEntry> symbol_entry = symbol_local_table.find(id_lexeme);
             if(symbol_entry){
-               (*symbol_entry).add_function_call(function_register);
-               symbol_local_table.insert(
+                (*symbol_entry).add_function_call(function_register);
+                symbol_local_table.insert(
                     std::move((*symbol_entry))
                 );
             }else{
+                // Recupera a tabela de simbolos da funcao chamada
+                std::optional<SymbolTable> temp_symbol_table = this->symbol_table_list.find_table(id_lexeme);
+                // Criando e inserindo uma entrada para a tabela de simbolos
                 compiler::SymbolEntry symbol_entry_local(id_lexeme, (*temp_symbol_table).get_return_type(), false, -1);
                 symbol_entry_local.add_function_call(function_register);
                 symbol_local_table.insert(
@@ -787,32 +794,32 @@ namespace compiler {
             
             this->match(compiler::TokenType::ID);
             
-            // Pegando o lexema do argumento atual
+            // Recuperando o lexema do argumento atual
             arg_lexeme = id_lexeme;
-            // Pegando o node do ID
+            // Recuperando o node do ID
             arg_node = this->chamada_funcao(symbol_local_table, id_lexeme);
 
         }else if(this->tokens[this->index].type == compiler::TokenType::INT_CONST){
-            // Pegando o lexema do argumento atual
+            // Recuperando o lexema do argumento atual
             arg_lexeme = this->tokens[this->index].lexeme;
 
-            // Pegando o node do ID
+            // // Instanciando o literal atual
             arg_node = std::make_shared<IntConstNode>(std::stoi(arg_lexeme));
 
             this->match(compiler::TokenType::INT_CONST);
         }else if (this->tokens[this->index].type == compiler::TokenType::FLOAT_CONST){
-            // Pegando o lexema do argumento atual
+            // Recuperando o lexema do argumento atual
             arg_lexeme = this->tokens[this->index].lexeme;
 
-            // Pegando o node do ID
+            // // Instanciando o literal atual
             arg_node = std::make_shared<FloatConstNode>(std::stof(arg_lexeme));
           
             this->match(compiler::TokenType::FLOAT_CONST);
         }else if (this->tokens[this->index].type == compiler::TokenType::CHAR_LITERAL){
-            // Pegando o lexema do argumento atual
+            // Recuperando o lexema do argumento atual
             arg_lexeme = this->tokens[this->index].lexeme;
 
-            // Pegando o node do ID
+            // Instanciando o literal atual
             arg_node = std::make_shared<CharConstNode>(arg_lexeme[0]);
           
             this->match(compiler::TokenType::CHAR_LITERAL);

@@ -6,6 +6,7 @@
 #include "asa.hpp"
 #include <vector>
 #include <stdbool.h>
+#include <unordered_map>
 #include <memory>
 
 namespace compiler{
@@ -16,10 +17,12 @@ namespace compiler{
         private:
             std::vector<compiler::Token> tokens;
             compiler::SymbolTableList symbol_table_list;
+            std::unordered_map<std::string, std::shared_ptr<ASTNode>> ast_list;
             size_t index;
             bool error;
 
-            void imprimir_parser();   
+            void imprimir_table_symbol();   
+            void imprimir_ast();   
             void match(compiler::TokenType tok);
             void programa();
             void funcao_seq();
