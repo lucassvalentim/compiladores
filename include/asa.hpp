@@ -76,6 +76,121 @@ namespace compiler {
 
             void print(int indent = 0) const override;
     };
+    // No para atribuicao
+    class AssignNode : public ASTNode {
+        public:
+            AssignNode() : ASTNode(NodeType::ASSIGN) {}
+
+            void set_assignment(std::shared_ptr<ASTNode> id, std::shared_ptr<ASTNode> expr);
+            std::shared_ptr<ASTNode> get_id() const;
+            std::shared_ptr<ASTNode> get_expression() const;
+
+            void print(int indent = 0) const override;
+    };
+
+    // No para operados relacionais
+    class RelOp : public ASTNode {
+        private:
+            std::string op;
+
+        public:
+            RelOp(std::string& operation) : ASTNode(NodeType::REL_OP), op(operation) {}
+
+            const std::string& get_operator() const;
+            void set_operands(std::shared_ptr<compiler::ASTNode> left, std::shared_ptr<compiler::ASTNode> rigth);
+
+            void print(int indent = 0) const override;
+    };
+
+    // No de expressao aritmetica
+    class AritOp : public ASTNode {
+        private:
+            std::string op;
+        
+        public:
+            AritOp(std::string& operation) : ASTNode(NodeType::ARIT_OP), op(operation) {}
+
+            const std::string& get_operator() const;
+            void set_operands(std::shared_ptr<ASTNode> left, std::shared_ptr<ASTNode> right);
+
+            void print(int indent = 0) const override;
+    };
+
+    // No de chamada de funcao
+    class CallNode : public ASTNode {
+        private:
+            std::string function_name;
+
+        public:
+            CallNode(const std::string& name) 
+                : ASTNode(NodeType::CALL), function_name(name) {}
+
+            const std::string& get_name() const;
+            void add_argument(std::shared_ptr<ASTNode> arg);
+            size_t num_arguments() const;
+
+            void print(int indent = 0) const override;
+    };
+
+    // No's das constantes
+    class IdNode : public ASTNode {
+        private:
+            std::string name;
+
+        public:
+            IdNode(std::string &id_name) : ASTNode(NodeType::ID), name(id_name) {}
+            
+            const std::string& get_name() const;
+
+            void print(int indent = 0) const override;
+    };
+
+    class IntConstNode : public ASTNode{
+        private:
+            int value;
+        
+        public:
+            IntConstNode(int val) : ASTNode(NodeType::INT_CONST), value(val) {
+                data_type = DataTypeASA::INT;
+            }
+
+            int get_value() const;
+
+            void print(int indent = 0) const override;
+            
+    };
+
+    // No's das constantes
+    class FloatConstNode : public ASTNode{
+        private:
+            float value;
+        
+        public:
+            FloatConstNode(int val) : ASTNode(NodeType::FLOAT_CONST), value(val) {
+                data_type = DataTypeASA::FLOAT;
+            }
+
+            float get_value() const;
+
+            void print(int indent = 0) const override;
+            
+    };
+
+    // No's das constantes
+    class CharConstNode : public ASTNode{
+        private:
+            char value;
+        
+        public:
+            CharConstNode(int val) : ASTNode(NodeType::CHAR_CONST), value(val) {
+                data_type = DataTypeASA::CHAR;
+            }
+
+            char get_value() const;
+
+            void print(int indent = 0) const override;
+            
+    };
 }
 
 #endif

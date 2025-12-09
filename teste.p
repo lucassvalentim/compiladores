@@ -1,49 +1,14 @@
-fn maior(x: int, y: int) -> int {
-    if x < y {
-        return y;
-    }
-    else if x >= y{
-        return x;
-    }
-}
-
-fn calculadora(op: char, x: float, y: float) -> float {
-    if op == '+' {
-        return x + y;
-    }
-    else if op == '-'{
-        return x - y;
-    }
-    else if op == '*'{
-        return x * y;
-    }
-    else if op == '/' {
-        let m: int; 
-        if y == 0 {
-            return 0.0;
-        }
-        return x / y;
-    }
-    else if n1 <= n2 + 1 {
-        return x / y;
-    }
-    
-    n = 0;
-    
-    return 0.0;
-}
-
 fn main(){ 
     let a, c: float;
-    let a: char;
-    a = 1.8;
-    b = 7.2;
-    c = a + e;
-    f = nome1 * 2;
+    a = 3 + a + c * 1;
+    d = 100 * 2 + 1 / 4;
 
-    maior(1, 2);
-    maior(4, 0);
+    if a < c * 1 + a - 1 {
+        if (2 < 3) ==  (a + 1 != d) {
+            c = 1;
+            return a;
+        }
 
-    println("{}", calculadora('*', a, b));
-    println("{}", calculadora('+', a, b));
+        return a + c;
+    }
 }

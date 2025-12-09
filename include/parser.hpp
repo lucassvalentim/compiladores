@@ -3,8 +3,10 @@
 
 #include "token.hpp"
 #include "symbol_table.hpp"
+#include "asa.hpp"
 #include <vector>
 #include <stdbool.h>
+#include <memory>
 
 namespace compiler{
     class Parser {
@@ -33,22 +35,22 @@ namespace compiler{
             void var_list2(std::vector<std::string> &list_ids);
             compiler::DataType type();
             void comando(compiler::SymbolTable &symbol_table_local);
-            void atribuicao_ou_chamada(compiler::SymbolTable &symbol_table_local, std::string &id_lexeme);
+            std::shared_ptr<compiler::ASTNode> atribuicao_ou_chamada(compiler::SymbolTable &symbol_table_local, std::string &id_lexeme);
             void comando_se(compiler::SymbolTable &symbol_table_local);
             void comando_senao(compiler::SymbolTable &symbol_table_local);
-            void expr(compiler::SymbolTable &symbol_table_local);
-            void expr_opc(compiler::SymbolTable &symbol_table_local);
+            std::shared_ptr<compiler::ASTNode> expr(compiler::SymbolTable &symbol_table_local);
+            std::shared_ptr<compiler::ASTNode> expr_opc(compiler::SymbolTable &symbol_table_local, std::shared_ptr<compiler::ASTNode> left_leaf_knot);
             void op_igual();
-            void rel(compiler::SymbolTable &symbol_table_local);
-            void rel_opc(compiler::SymbolTable &symbol_table_local);
+            std::shared_ptr<compiler::ASTNode> rel(compiler::SymbolTable &symbol_table_local);
+            std::shared_ptr<compiler::ASTNode> rel_opc(compiler::SymbolTable &symbol_table_local, std::shared_ptr<compiler::ASTNode> left_leaf_knot);
             void op_rel();
-            void adicao(compiler::SymbolTable &symbol_table_local);
-            void adicao_opc(compiler::SymbolTable &symbol_table_local);
+            std::shared_ptr<compiler::ASTNode> adicao(compiler::SymbolTable &symbol_table_local);
+            std::shared_ptr<compiler::ASTNode> adicao_opc(compiler::SymbolTable &symbol_table_local, std::shared_ptr<compiler::ASTNode> left_leaf_knot);
             void op_adicao();
-            void termo(compiler::SymbolTable &symbol_table_local);
-            void termo_opc(compiler::SymbolTable &symbol_table_local);
+            std::shared_ptr<compiler::ASTNode> termo(compiler::SymbolTable &symbol_table_local);
+            std::shared_ptr<compiler::ASTNode> termo_opc(compiler::SymbolTable &symbol_table_local, std::shared_ptr<compiler::ASTNode> left_leaf_knot);
             void op_mult();
-            void fator(compiler::SymbolTable &symbol_table_local);
+            std::shared_ptr<compiler::ASTNode> fator(compiler::SymbolTable &symbol_table_local);
             void chamada_funcao(compiler::SymbolTable &symbol_table_local, std::string &id_lexeme);
             void lista_args(compiler::SymbolTable &symbol_table_local, std::vector<std::string> &arguments);
             void lista_args2(compiler::SymbolTable &symbol_table_local, std::vector<std::string> &arguments);

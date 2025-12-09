@@ -315,9 +315,13 @@ namespace compiler {
     void Parser::comando(compiler::SymbolTable &symbol_local_table){
         if(this->tokens[this->index].type == compiler::TokenType::ID){
             std::string id_lexeme = this->tokens[this->index].lexeme;
-            
             this->match(compiler::TokenType::ID);
-            this->atribuicao_ou_chamada(symbol_local_table, id_lexeme);
+            auto assign_node =  this->atribuicao_ou_chamada(symbol_local_table, id_lexeme);
+
+            if(assign_node)
+                assign_node->print();
+            else
+                std::cout << "problemas com atribuicao\n";
         }else if(this->tokens[this->index].type == compiler::TokenType::IF){
             this->comando_se(symbol_local_table);
         }else if(this->tokens[this->index].type == compiler::TokenType::WHILE){
@@ -348,20 +352,27 @@ namespace compiler {
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         }
     }
-    void Parser::atribuicao_ou_chamada(compiler::SymbolTable &symbol_local_table, std::string &id_lexeme){
+    std::shared_ptr<compiler::ASTNode> Parser::atribuicao_ou_chamada(compiler::SymbolTable &symbol_local_table, std::string &id_lexeme){
         if(this->tokens[this->index].type == compiler::TokenType::ASSIGN){
+            this->match(compiler::TokenType::ASSIGN);
+            auto expr_return = this->expr(symbol_local_table);
+            this->match(compiler::TokenType::SEMICOLON);
+            
             if(!symbol_local_table.find(id_lexeme)){
                 std::cout << "A variavel " << "'" << id_lexeme << "'" <<  " nao foi declarada ou passada por parametros\n";
+            }else{
+                auto id_knot = std::make_shared<compiler::IdNode>(id_lexeme);
+                auto assign_node = std::make_shared<compiler::AssignNode>();
+                assign_node->set_assignment(id_knot, expr_return);
+                return assign_node;
             }
-
-            this->match(compiler::TokenType::ASSIGN);
-            this->expr(symbol_local_table);
-            this->match(compiler::TokenType::SEMICOLON);
         }else if(this->tokens[this->index].type == compiler::TokenType::LBRACKET){
             this->match(compiler::TokenType::LBRACKET);
 
             std::vector<std::string> arguments;
             this->lista_args(symbol_local_table, arguments);
+
+            //
 
             this->match(compiler::TokenType::RBRACKET);
             this->match(compiler::TokenType::SEMICOLON);
@@ -393,6 +404,8 @@ namespace compiler {
             std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         }
+
+        return nullptr;
     }
     void Parser::comando_se(compiler::SymbolTable &symbol_local_table){
         if(this->tokens[this->index].type == compiler::TokenType::IF){
@@ -413,26 +426,42 @@ namespace compiler {
             this->comando_se(symbol_local_table);
         }
     }
-    void Parser::expr(compiler::SymbolTable &symbol_local_table){
+    std::shared_ptr<compiler::ASTNode> Parser::expr(compiler::SymbolTable &symbol_local_table){
+        std::shared_ptr<compiler::ASTNode> leaf_knot;
         if(this->tokens[this->index].type == compiler::TokenType::ID || 
             this->tokens[this->index].type == compiler::TokenType::INT_CONST ||
             this->tokens[this->index].type == compiler::TokenType::FLOAT_CONST ||
             this->tokens[this->index].type == compiler::TokenType::CHAR_LITERAL ||
             this->tokens[this->index].type == compiler::TokenType::LBRACKET){
-                this->rel(symbol_local_table);
-                this->expr_opc(symbol_local_table);
+                leaf_knot = this->rel(symbol_local_table);
+                leaf_knot = this->expr_opc(symbol_local_table, leaf_knot);
+
+                if(!leaf_knot){
+                    std::cout << "nos vazios\n";
+                }
+                else{
+                    leaf_knot->print();
+                }
         }else if(!this->error){
             std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         }
+
+        return leaf_knot;
     }
-    void Parser::expr_opc(compiler::SymbolTable &symbol_local_table){
+    std::shared_ptr<compiler::ASTNode> Parser::expr_opc(compiler::SymbolTable &symbol_local_table, std::shared_ptr<compiler::ASTNode> left_leaf_knot){
         if(this->tokens[this->index].type == compiler::TokenType::EQ ||
             this->tokens[this->index].type == compiler::TokenType::NE){
+            auto rel_knot = std::make_shared<compiler::RelOp>(this->tokens[this->index].lexeme);
             this->op_igual();
-            this->rel(symbol_local_table);
-            this->expr_opc(symbol_local_table);
+
+            std::shared_ptr<compiler::ASTNode> right_leaf_knot = this->rel(symbol_local_table);;
+            rel_knot->set_operands(left_leaf_knot, right_leaf_knot);
+
+            return this->expr_opc(symbol_local_table, rel_knot);
         }
+
+        return left_leaf_knot;
     }
     void Parser::op_igual(){
         if(this->tokens[this->index].type == compiler::TokenType::EQ){
@@ -444,28 +473,45 @@ namespace compiler {
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         }
     }
-    void Parser::rel(compiler::SymbolTable &symbol_local_table){
+    std::shared_ptr<compiler::ASTNode> Parser::rel(compiler::SymbolTable &symbol_local_table){
+        std::shared_ptr<compiler::ASTNode> leaf_knot;
         if(this->tokens[this->index].type == compiler::TokenType::ID || 
             this->tokens[this->index].type == compiler::TokenType::INT_CONST ||
             this->tokens[this->index].type == compiler::TokenType::FLOAT_CONST ||
             this->tokens[this->index].type == compiler::TokenType::CHAR_LITERAL ||
             this->tokens[this->index].type == compiler::TokenType::LBRACKET){
-                this->adicao(symbol_local_table);
-                this->rel_opc(symbol_local_table);
+                leaf_knot = this->adicao(symbol_local_table);
+                leaf_knot = this->rel_opc(symbol_local_table, leaf_knot);
+
+                if(!leaf_knot){
+                    std::cout << "nos vazios\n";
+                }
+                else{
+                    leaf_knot->print();
+                }
         }else if(!this->error){
             std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         }
+
+        return leaf_knot;
     }
-    void Parser::rel_opc(compiler::SymbolTable &symbol_local_table){
+    std::shared_ptr<compiler::ASTNode> Parser::rel_opc(compiler::SymbolTable &symbol_local_table, std::shared_ptr<compiler::ASTNode> left_leaf_knot){
         if(this->tokens[this->index].type == compiler::TokenType::LT || 
             this->tokens[this->index].type == compiler::TokenType::LE ||
             this->tokens[this->index].type == compiler::TokenType::GT ||
             this->tokens[this->index].type == compiler::TokenType::GE){
+                auto rel_knot = std::make_shared<compiler::RelOp>(this->tokens[this->index].lexeme);
                 this->op_rel();
-                this->adicao(symbol_local_table);
-                this->rel_opc(symbol_local_table);
+
+                std::shared_ptr<compiler::ASTNode> right_leaf_knot = this->adicao(symbol_local_table);
+                rel_knot->set_operands(left_leaf_knot, right_leaf_knot);
+
+                
+                return this->rel_opc(symbol_local_table, rel_knot);
             }
+
+        return left_leaf_knot;
     }
     void Parser::op_rel(){
         if(this->tokens[this->index].type == compiler::TokenType::LT){
@@ -481,26 +527,43 @@ namespace compiler {
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         }
     }
-    void Parser::adicao(compiler::SymbolTable &symbol_local_table){
+    std::shared_ptr<compiler::ASTNode> Parser::adicao(compiler::SymbolTable &symbol_local_table){
+        std::shared_ptr<compiler::ASTNode> leaf_knot;
         if(this->tokens[this->index].type == compiler::TokenType::ID || 
             this->tokens[this->index].type == compiler::TokenType::INT_CONST ||
             this->tokens[this->index].type == compiler::TokenType::FLOAT_CONST ||
             this->tokens[this->index].type == compiler::TokenType::CHAR_LITERAL ||
             this->tokens[this->index].type == compiler::TokenType::LBRACKET){
-                this->termo(symbol_local_table);
-                this->adicao_opc(symbol_local_table);   
+                leaf_knot = this->termo(symbol_local_table);
+                leaf_knot = this->adicao_opc(symbol_local_table, leaf_knot);
+
+                if(!leaf_knot){
+                    std::cout << "nos vazios\n";
+                }
+                else{
+                    leaf_knot->print();
+                }
+
         }else if(!this->error){
             std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
-        }       
+        }
+
+        return leaf_knot;
     }
-    void Parser::adicao_opc(compiler::SymbolTable &symbol_local_table){
+    std::shared_ptr<compiler::ASTNode> Parser::adicao_opc(compiler::SymbolTable &symbol_local_table, std::shared_ptr<compiler::ASTNode> left_leaf_knot){
         if(this->tokens[this->index].type == compiler::TokenType::PLUS ||
             this->tokens[this->index].type == compiler::TokenType::MINUS){
+                auto arithmetic_knot = std::make_shared<compiler::AritOp>(this->tokens[this->index].lexeme);
                 this->op_adicao();
-                this->termo(symbol_local_table);
-                this->adicao_opc(symbol_local_table);
-            }       
+                
+                std::shared_ptr<compiler::ASTNode> right_leaf_knot = this->termo(symbol_local_table);
+                arithmetic_knot->set_operands(left_leaf_knot, right_leaf_knot);
+                
+                return this->adicao_opc(symbol_local_table, arithmetic_knot);
+            }
+
+        return left_leaf_knot;
     }
     void Parser::op_adicao(){
         if(this->tokens[this->index].type == compiler::TokenType::PLUS){
@@ -512,26 +575,35 @@ namespace compiler {
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         } 
     }
-    void Parser::termo(compiler::SymbolTable &symbol_local_table){
+    std::shared_ptr<compiler::ASTNode> Parser::termo(compiler::SymbolTable &symbol_local_table){
+        std::shared_ptr<compiler::ASTNode> leaf_knot;
         if(this->tokens[this->index].type == compiler::TokenType::ID || 
             this->tokens[this->index].type == compiler::TokenType::INT_CONST ||
             this->tokens[this->index].type == compiler::TokenType::FLOAT_CONST ||
             this->tokens[this->index].type == compiler::TokenType::CHAR_LITERAL ||
             this->tokens[this->index].type == compiler::TokenType::LBRACKET){
-                this->fator(symbol_local_table);
-                this->termo_opc(symbol_local_table);   
+                leaf_knot = this->fator(symbol_local_table);
+                leaf_knot = this->termo_opc(symbol_local_table, leaf_knot);   
         }else if(!this->error){
             std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         } 
+
+        return leaf_knot;
     }
-    void Parser::termo_opc(compiler::SymbolTable &symbol_local_table){
+    std::shared_ptr<compiler::ASTNode> Parser::termo_opc(compiler::SymbolTable &symbol_local_table, std::shared_ptr<compiler::ASTNode> left_leaf_knot){
         if(this->tokens[this->index].type == compiler::TokenType::MULT ||
-        this->tokens[this->index].type == compiler::TokenType::DIV){
+            this->tokens[this->index].type == compiler::TokenType::DIV){
+            auto arithmetic_knot = std::make_shared<compiler::AritOp>(this->tokens[this->index].lexeme);
             this->op_mult();
-            this->fator(symbol_local_table);
-            this->termo_opc(symbol_local_table);
+            
+            std::shared_ptr<compiler::ASTNode> right_leaf_knot = this->fator(symbol_local_table);
+            arithmetic_knot->set_operands(left_leaf_knot, right_leaf_knot);
+
+            return this->termo_opc(symbol_local_table, arithmetic_knot);
         }
+
+        return left_leaf_knot;
     }
     void Parser::op_mult(){
         if(this->tokens[this->index].type == compiler::TokenType::MULT){
@@ -543,27 +615,36 @@ namespace compiler {
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         }
     }
-    void Parser::fator(compiler::SymbolTable &symbol_local_table){
+    std::shared_ptr<compiler::ASTNode> Parser::fator(compiler::SymbolTable &symbol_local_table){
+        std::shared_ptr<compiler::ASTNode> leaf_knot;
+
         if(this->tokens[this->index].type == compiler::TokenType::ID){
             // lexema do id atual avaliado para verificao se eh ou nao uma funcao 
             std::string id_lexeme = this->tokens[this->index].lexeme;
 
+            leaf_knot = std::make_shared<compiler::IdNode>(id_lexeme);
+
             this->match(compiler::TokenType::ID);
             this->chamada_funcao(symbol_local_table, id_lexeme);
         }else if(this->tokens[this->index].type == compiler::TokenType::INT_CONST){
-          this->match(compiler::TokenType::INT_CONST);
+            leaf_knot = std::make_shared<compiler::IntConstNode>(std::stoi(this->tokens[this->index].lexeme));
+            this->match(compiler::TokenType::INT_CONST);
         }else if (this->tokens[this->index].type == compiler::TokenType::FLOAT_CONST){
-          this->match(compiler::TokenType::FLOAT_CONST);
+            leaf_knot = std::make_shared<compiler::FloatConstNode>(std::stof(this->tokens[this->index].lexeme));
+            this->match(compiler::TokenType::FLOAT_CONST);
         }else if (this->tokens[this->index].type == compiler::TokenType::CHAR_LITERAL){
-          this->match(compiler::TokenType::CHAR_LITERAL);
+            leaf_knot = std::make_shared<compiler::CharConstNode>(this->tokens[this->index].lexeme[0]);
+            this->match(compiler::TokenType::CHAR_LITERAL);
         }else if (this->tokens[this->index].type == compiler::TokenType::LBRACKET){
             this->match(compiler::TokenType::LBRACKET);
-            this->expr(symbol_local_table);
+            leaf_knot = this->expr(symbol_local_table);
             this->match(compiler::TokenType::RBRACKET);
         }else if(!this->error){
             std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         }
+
+        return leaf_knot;
     }
     void Parser::chamada_funcao(compiler::SymbolTable &symbol_local_table, std::string &id_lexeme){
         if(this->tokens[this->index].type == compiler::TokenType::LBRACKET){
