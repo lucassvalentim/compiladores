@@ -76,6 +76,7 @@ namespace compiler {
 
             void print(int indent = 0) const override;
     };
+
     // No para atribuicao
     class AssignNode : public ASTNode {
         public:
@@ -87,6 +88,26 @@ namespace compiler {
 
             void print(int indent = 0) const override;
     };
+
+    // Nó para comando if
+    class IfNode : public ASTNode {
+    public:
+        IfNode() : ASTNode(NodeType::IF) {}
+
+        void set_if(std::shared_ptr<ASTNode> condition, std::shared_ptr<ASTNode> then_block);
+
+        void set_if_else(std::shared_ptr<ASTNode> condition, 
+                        std::shared_ptr<ASTNode> then_block,
+                        std::shared_ptr<ASTNode> else_block);
+
+        bool has_else() const ;
+        std::shared_ptr<ASTNode> get_condition() const;
+        std::shared_ptr<ASTNode> get_then_block() const;
+        std::shared_ptr<ASTNode> get_else_block() const;
+
+        void print(int indent = 0) const override;
+    };
+
 
     // No para operados relacionais
     class RelOp : public ASTNode {

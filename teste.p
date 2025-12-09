@@ -9,12 +9,14 @@ fn main(){
             c = 1;
             return a;
         }
-
         return a + c;
+    }else{
+        if x < 2 {
+            a = a + 1;
+        } else if a == b {
+            a = a + 2;
+        }
     }
-
-    funcao1(a, '4', 3.4, 4);
-    funcao2(a, d, 4);
 
     println("{}", funcao1(3, 2, d));
 }

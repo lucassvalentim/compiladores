@@ -36,8 +36,8 @@ namespace compiler{
             compiler::DataType type();
             std::shared_ptr<compiler::ASTNode> comando(compiler::SymbolTable &symbol_table_local);
             std::shared_ptr<compiler::ASTNode> atribuicao_ou_chamada(compiler::SymbolTable &symbol_table_local, std::string &id_lexeme);
-            void comando_se(compiler::SymbolTable &symbol_table_local);
-            void comando_senao(compiler::SymbolTable &symbol_table_local);
+            std::shared_ptr<compiler::ASTNode> comando_se(compiler::SymbolTable &symbol_table_local);
+            std::shared_ptr<compiler::ASTNode> comando_senao(compiler::SymbolTable &symbol_table_local);
             std::shared_ptr<compiler::ASTNode> expr(compiler::SymbolTable &symbol_table_local);
             std::shared_ptr<compiler::ASTNode> expr_opc(compiler::SymbolTable &symbol_table_local, std::shared_ptr<compiler::ASTNode> left_leaf_knot);
             void op_igual();

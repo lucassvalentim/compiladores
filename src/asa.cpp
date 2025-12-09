@@ -97,6 +97,52 @@ namespace compiler {
         std::cout << "└─ END ASSIGN\n";
     }
 
+    // Comando dos no's de condicao
+    void compiler::IfNode::set_if(std::shared_ptr<ASTNode> condition, std::shared_ptr<ASTNode> then_block) {
+        childrens.clear();
+        add_child(condition);
+        add_child(then_block);
+    }
+    void compiler::IfNode::set_if_else(std::shared_ptr<ASTNode> condition, 
+                    std::shared_ptr<ASTNode> then_block,
+                    std::shared_ptr<ASTNode> else_block) {
+        childrens.clear();
+        add_child(condition);
+        add_child(then_block);
+        add_child(else_block);
+    }
+    bool compiler::IfNode::has_else() const { 
+        return childrens.size() == 3; 
+    }
+    std::shared_ptr<ASTNode> compiler::IfNode::get_condition() const { 
+        return childrens[0]; 
+    }
+    std::shared_ptr<ASTNode> compiler::IfNode::get_then_block() const { 
+        return childrens[1]; 
+    }
+    std::shared_ptr<ASTNode> compiler::IfNode::get_else_block() const { 
+        return has_else() ? childrens[2] : nullptr; 
+    }
+    void compiler::IfNode::print(int indent) const {
+        auxiliary_printing_function::print_indent(indent);
+        std::cout << "┌─ IF\n";
+        if(childrens.size() >= 2) {
+            auxiliary_printing_function::print_indent(indent);
+            std::cout << "│  Condicao:\n";
+            childrens[0]->print(indent + 1);
+            auxiliary_printing_function::print_indent(indent);
+            std::cout << "│  Bloco THEN:\n";
+            childrens[1]->print(indent + 1);
+            if(childrens.size() == 3) {
+                auxiliary_printing_function::print_indent(indent);
+                std::cout << "│  Bloco ELSE:\n";
+                childrens[2]->print(indent + 1);
+            }
+        }
+        auxiliary_printing_function::print_indent(indent);
+        std::cout << "└─ END IF\n";
+    };
+
     // Comando dos no de expressao relacional
     const std::string& compiler::RelOp::get_operator() const {
         return op;

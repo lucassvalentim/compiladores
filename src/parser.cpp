@@ -214,6 +214,7 @@ namespace compiler {
             this->match(compiler::TokenType::LBRACE);
             this->sequencia(symbol_local_table, block_node);
             this->match(compiler::TokenType::RBRACE);
+            std::cout << "Voltou do else com: " << block_node->get_childrens().size() << std::endl;
         }else if(!this->error){
             std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
@@ -222,6 +223,10 @@ namespace compiler {
         return block_node;
     }
     std::shared_ptr<compiler::ASTNode> Parser::sequencia(compiler::SymbolTable &symbol_local_table, std::shared_ptr<compiler::BlockNode> block_node){
+        if(this->tokens[this->index].type == compiler::TokenType::RBRACE){
+            std::cout << "ACABOU UM BLOCO\n";
+            std::cout << "Ultimo token reconhecido: " << (int)this->tokens[this->index-1].type << std::endl;
+        }
         if(this->tokens[this->index].type == compiler::TokenType::LET){
             this->declaracao(symbol_local_table);
             this->sequencia(symbol_local_table, block_node);
@@ -234,7 +239,7 @@ namespace compiler {
             auto comando_node = this->comando(symbol_local_table);
             if(comando_node){
                 block_node->add_statement(comando_node);
-                // comando_node->print();
+                comando_node->print();
             }else{
                 std::cout << "Deu falha no  comando.\n";
             }
@@ -324,7 +329,7 @@ namespace compiler {
         }
         return type_ids;
     }
-     std::shared_ptr<compiler::ASTNode> Parser::comando(compiler::SymbolTable &symbol_local_table){
+    std::shared_ptr<compiler::ASTNode> Parser::comando(compiler::SymbolTable &symbol_local_table){
         if(this->tokens[this->index].type == compiler::TokenType::ID){
             std::string id_lexeme = this->tokens[this->index].lexeme;
             this->match(compiler::TokenType::ID);
@@ -338,7 +343,7 @@ namespace compiler {
             
             return call_or_assign_node;
         }else if(this->tokens[this->index].type == compiler::TokenType::IF){
-            this->comando_se(symbol_local_table);
+            return this->comando_se(symbol_local_table);
         }else if(this->tokens[this->index].type == compiler::TokenType::WHILE){
             this->match(compiler::TokenType::WHILE);
             this->expr(symbol_local_table);
@@ -446,24 +451,40 @@ namespace compiler {
 
         return nullptr;
     }
-    void Parser::comando_se(compiler::SymbolTable &symbol_local_table){
+    std::shared_ptr<compiler::ASTNode> Parser::comando_se(compiler::SymbolTable &symbol_local_table){
         if(this->tokens[this->index].type == compiler::TokenType::IF){
             this->match(compiler::TokenType::IF);
-            this->expr(symbol_local_table);
-            this->bloco(symbol_local_table);
-            this->comando_senao(symbol_local_table);
+            
+            auto condition_node = this->expr(symbol_local_table);
+            auto then_block = this->bloco(symbol_local_table);
+            
+            std::shared_ptr<compiler::IfNode> if_condition;
+            if_condition = std::make_shared<compiler::IfNode>();
+            if_condition->set_if(condition_node, then_block);
+
+            auto else_node = this->comando_senao(symbol_local_table);
+
+            if(else_node){
+                if_condition->set_if_else(condition_node, then_block, else_node);
+            }
+
+            return if_condition;
         }else if(this->tokens[this->index].type == compiler::TokenType::LBRACE){
-            this->bloco(symbol_local_table);
+            return this->bloco(symbol_local_table);
         }else if(!this->error){
             std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         }
+
+        return nullptr;
     }
-    void Parser::comando_senao(compiler::SymbolTable &symbol_local_table){
+    std::shared_ptr<compiler::ASTNode> Parser::comando_senao(compiler::SymbolTable &symbol_local_table){
         if(this->tokens[this->index].type == compiler::TokenType::ELSE){
             this->match(compiler::TokenType::ELSE);
-            this->comando_se(symbol_local_table);
+            return this->comando_se(symbol_local_table);
         }
+
+        return nullptr;
     }
     std::shared_ptr<compiler::ASTNode> Parser::expr(compiler::SymbolTable &symbol_local_table){
         std::shared_ptr<compiler::ASTNode> leaf_knot;
