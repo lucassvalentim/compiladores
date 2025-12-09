@@ -143,6 +143,53 @@ namespace compiler {
         std::cout << "└─ END IF\n";
     };
 
+    // Comandos do no WHILE
+    void compiler::WhileNode::set_while(std::shared_ptr<ASTNode> condition, std::shared_ptr<ASTNode> body) {
+        childrens.clear();
+        add_child(condition);
+        add_child(body);
+    }
+    std::shared_ptr<ASTNode> compiler::WhileNode::get_condition() const { 
+        return childrens[0]; 
+    }
+    std::shared_ptr<ASTNode> compiler::WhileNode::get_body() const { 
+        return childrens[1]; 
+    }
+    void compiler::WhileNode::WhileNode::print(int indent) const {
+        auxiliary_printing_function::print_indent(indent);
+        std::cout << "┌─ WHILE\n";
+        if(childrens.size() >= 2) {
+            auxiliary_printing_function::print_indent(indent);
+            std::cout << "│  Condicao:\n";
+            childrens[0]->print(indent + 1);
+            auxiliary_printing_function::print_indent(indent);
+            std::cout << "│  Corpo:\n";
+            childrens[1]->print(indent + 1);
+        }
+        auxiliary_printing_function::print_indent(indent);
+        std::cout << "└─ END WHILE\n";
+    }
+
+    // Comandos do no RETURN
+     void compiler::ReturnNode::set_expression(std::shared_ptr<ASTNode> expr) {
+        childrens.clear();
+        add_child(expr);
+    }
+    std::shared_ptr<ASTNode> compiler::ReturnNode::get_expression() const { 
+        return childrens.empty() ? nullptr : childrens[0]; 
+    }
+    void ReturnNode::print(int indent) const {
+        auxiliary_printing_function::print_indent(indent);
+        std::cout << "┌─ RETURN\n";
+        if(!childrens.empty()) {
+            auxiliary_printing_function::print_indent(indent);
+            std::cout << "│  Expressao:\n";
+            childrens[0]->print(indent + 1);
+        }
+        auxiliary_printing_function::print_indent(indent);
+        std::cout << "└─ END RETURN\n";
+    }
+
     // Comando dos no de expressao relacional
     const std::string& compiler::RelOp::get_operator() const {
         return op;

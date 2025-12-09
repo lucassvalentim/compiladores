@@ -108,6 +108,19 @@ namespace compiler {
         void print(int indent = 0) const override;
     };
 
+    // Nó para comando while
+    class WhileNode : public ASTNode {
+        public:
+            WhileNode() : ASTNode(NodeType::WHILE) {}
+
+            void set_while(std::shared_ptr<ASTNode> condition, std::shared_ptr<ASTNode> body);
+
+            std::shared_ptr<ASTNode> get_condition() const;
+            std::shared_ptr<ASTNode> get_body() const;
+
+            void print(int indent = 0) const override;
+    };
+
 
     // No para operados relacionais
     class RelOp : public ASTNode {
@@ -133,6 +146,17 @@ namespace compiler {
 
             const std::string& get_operator() const;
             void set_operands(std::shared_ptr<ASTNode> left, std::shared_ptr<ASTNode> right);
+
+            void print(int indent = 0) const override;
+    };
+
+    // Nó para comando return
+    class ReturnNode : public ASTNode {
+        public:
+            ReturnNode() : ASTNode(NodeType::RETURN) {}
+
+            void set_expression(std::shared_ptr<ASTNode> expr);
+            std::shared_ptr<ASTNode> get_expression() const;
 
             void print(int indent = 0) const override;
     };

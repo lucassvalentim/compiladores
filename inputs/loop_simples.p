@@ -1,7 +1,7 @@
 fn main(){ 
     let i: int;
     i = 0;
-    while i < 10 {
+    while i >= 10 {
         println("{}", i);
         i = i + 1;
     }

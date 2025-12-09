@@ -223,10 +223,6 @@ namespace compiler {
         return block_node;
     }
     std::shared_ptr<compiler::ASTNode> Parser::sequencia(compiler::SymbolTable &symbol_local_table, std::shared_ptr<compiler::BlockNode> block_node){
-        if(this->tokens[this->index].type == compiler::TokenType::RBRACE){
-            std::cout << "ACABOU UM BLOCO\n";
-            std::cout << "Ultimo token reconhecido: " << (int)this->tokens[this->index-1].type << std::endl;
-        }
         if(this->tokens[this->index].type == compiler::TokenType::LET){
             this->declaracao(symbol_local_table);
             this->sequencia(symbol_local_table, block_node);
@@ -245,7 +241,6 @@ namespace compiler {
             }
 
             this->sequencia(symbol_local_table, block_node);
-            // return comando_node;
         }
 
         return nullptr;
@@ -346,8 +341,13 @@ namespace compiler {
             return this->comando_se(symbol_local_table);
         }else if(this->tokens[this->index].type == compiler::TokenType::WHILE){
             this->match(compiler::TokenType::WHILE);
-            this->expr(symbol_local_table);
-            this->bloco(symbol_local_table);
+            auto node_expr = this->expr(symbol_local_table);
+            auto node_block = this->bloco(symbol_local_table);
+
+            auto while_node = std::make_shared<compiler::WhileNode>();
+            while_node->set_while(node_expr, node_block);
+
+            return while_node;
         }else if(this->tokens[this->index].type == compiler::TokenType::PRINTLN){
             symbol_local_table.insert(
                 compiler::SymbolEntry(this->tokens[this->index].lexeme, compiler::DataType::VOID, false, -1)
@@ -377,8 +377,13 @@ namespace compiler {
             return println_node;
         }else if(this->tokens[this->index].type == compiler::TokenType::RETURN){
             this->match(compiler::TokenType::RETURN);
-            this->expr(symbol_local_table);
+            auto expr_node = this->expr(symbol_local_table);
+            
+            auto return_node = std::make_shared<compiler::ReturnNode>();
+            return_node->set_expression(expr_node);
+
             this->match(compiler::TokenType::SEMICOLON);
+            return return_node;
         }else if(!this->error){
             std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
