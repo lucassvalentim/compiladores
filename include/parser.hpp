@@ -28,8 +28,8 @@ namespace compiler{
             std::optional<std::vector<std::pair<std::string, compiler::DataType>>> lista_params();
             void lista_params2(std::vector<std::pair<std::string, compiler::DataType>> &list_ids);
             compiler::DataType tipo_retorno_funcao();
-            void bloco(compiler::SymbolTable &symbol_table_local);
-            void sequencia(compiler::SymbolTable &symbol_table_local);
+            std::shared_ptr<compiler::ASTNode> bloco(compiler::SymbolTable &symbol_table_local);
+            std::shared_ptr<compiler::ASTNode> sequencia(compiler::SymbolTable &symbol_table_local, std::shared_ptr<compiler::BlockNode> block_node);
             void declaracao(compiler::SymbolTable &symbol_table_local);
             std::optional<std::vector<std::string>> var_list();
             void var_list2(std::vector<std::string> &list_ids);
