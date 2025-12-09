@@ -34,7 +34,7 @@ namespace compiler{
             std::optional<std::vector<std::string>> var_list();
             void var_list2(std::vector<std::string> &list_ids);
             compiler::DataType type();
-            void comando(compiler::SymbolTable &symbol_table_local);
+            std::shared_ptr<compiler::ASTNode> comando(compiler::SymbolTable &symbol_table_local);
             std::shared_ptr<compiler::ASTNode> atribuicao_ou_chamada(compiler::SymbolTable &symbol_table_local, std::string &id_lexeme);
             void comando_se(compiler::SymbolTable &symbol_table_local);
             void comando_senao(compiler::SymbolTable &symbol_table_local);
@@ -51,10 +51,10 @@ namespace compiler{
             std::shared_ptr<compiler::ASTNode> termo_opc(compiler::SymbolTable &symbol_table_local, std::shared_ptr<compiler::ASTNode> left_leaf_knot);
             void op_mult();
             std::shared_ptr<compiler::ASTNode> fator(compiler::SymbolTable &symbol_table_local);
-            void chamada_funcao(compiler::SymbolTable &symbol_table_local, std::string &id_lexeme);
-            void lista_args(compiler::SymbolTable &symbol_table_local, std::vector<std::string> &arguments);
-            void lista_args2(compiler::SymbolTable &symbol_table_local, std::vector<std::string> &arguments);
-            void arg(compiler::SymbolTable &symbol_table_local, std::vector<std::string> &arguments);
+            std::shared_ptr<compiler::ASTNode> chamada_funcao(compiler::SymbolTable &symbol_table_local, std::string &id_lexeme);
+            void lista_args(compiler::SymbolTable &symbol_table_local, std::vector<std::string> &arguments, std::vector<std::shared_ptr<ASTNode>>& argument_nodes);
+            void lista_args2(compiler::SymbolTable &symbol_table_local, std::vector<std::string> &arguments, std::vector<std::shared_ptr<ASTNode>>& argument_nodes);
+            void arg(compiler::SymbolTable &symbol_table_local, std::vector<std::string> &arguments, std::vector<std::shared_ptr<ASTNode>>& argument_nodes);
     };
 }
 

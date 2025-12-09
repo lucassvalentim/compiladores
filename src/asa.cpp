@@ -169,6 +169,26 @@ namespace compiler {
         std::cout << "└─ END CALL\n";
     }
 
+    // Comandos para o no do PRINTLN
+     void compiler::PrintNode::set_argument(std::shared_ptr<ASTNode> arg) {
+        childrens.clear();
+        add_child(arg);
+    }
+    std::shared_ptr<ASTNode> compiler::PrintNode::get_argument() const { 
+        return childrens[0]; 
+    }
+    void compiler::PrintNode::print(int indent) const{
+        auxiliary_printing_function::print_indent(indent);
+        std::cout << "┌─ PRINTLN\n";
+        if(!childrens.empty()) {
+            auxiliary_printing_function::print_indent(indent);
+            std::cout << "│  Argumento:\n";
+            childrens[0]->print(indent + 1);
+        }
+        auxiliary_printing_function::print_indent(indent);
+        std::cout << "└─ END PRINTLN\n";
+    }
+
     // Comandos dos no's folhas
     const std::string& compiler::IdNode::get_name() const {
         return name;

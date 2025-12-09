@@ -132,6 +132,17 @@ namespace compiler {
             void print(int indent = 0) const override;
     };
 
+    // Nó para comando println
+    class PrintNode : public ASTNode {
+        public:
+            PrintNode() : ASTNode(NodeType::PRINT) {}
+
+            void set_argument(std::shared_ptr<ASTNode> arg);
+            std::shared_ptr<ASTNode> get_argument() const;
+
+            void print(int indent = 0) const override;
+    };
+
     // No's das constantes
     class IdNode : public ASTNode {
         private:

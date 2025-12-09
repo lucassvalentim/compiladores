@@ -229,7 +229,14 @@ namespace compiler {
                 this->tokens[this->index].type == compiler::TokenType::WHILE ||
                 this->tokens[this->index].type == compiler::TokenType::PRINTLN ||
                 this->tokens[this->index].type == compiler::TokenType::RETURN){
-            this->comando(symbol_local_table);
+            
+            auto comando_node = this->comando(symbol_local_table);
+            if(comando_node){
+                comando_node->print();
+            }else{
+                std::cout << "Deu falha no  comando.\n";
+            }
+
             this->sequencia(symbol_local_table);
         }
     }
@@ -312,16 +319,19 @@ namespace compiler {
         }
         return type_ids;
     }
-    void Parser::comando(compiler::SymbolTable &symbol_local_table){
+     std::shared_ptr<compiler::ASTNode> Parser::comando(compiler::SymbolTable &symbol_local_table){
         if(this->tokens[this->index].type == compiler::TokenType::ID){
             std::string id_lexeme = this->tokens[this->index].lexeme;
             this->match(compiler::TokenType::ID);
-            auto assign_node =  this->atribuicao_ou_chamada(symbol_local_table, id_lexeme);
 
-            if(assign_node)
-                assign_node->print();
+            // No para criacao da chamada ou atribuicao para ASA
+            auto call_or_assign_node =  this->atribuicao_ou_chamada(symbol_local_table, id_lexeme);
+            if(call_or_assign_node)
+                call_or_assign_node->print();
             else
                 std::cout << "problemas com atribuicao\n";
+            
+            return call_or_assign_node;
         }else if(this->tokens[this->index].type == compiler::TokenType::IF){
             this->comando_se(symbol_local_table);
         }else if(this->tokens[this->index].type == compiler::TokenType::WHILE){
@@ -338,11 +348,23 @@ namespace compiler {
             this->match(compiler::TokenType::FMT_STRING);
             this->match(compiler::TokenType::COMMA);
 
-            std::vector<std::string> arguments; // Lista de argumentos que sera passado para a funcao "println" 
-            this->lista_args(symbol_local_table, arguments);
+            std::vector<std::string> arguments; // Lista de argumentos que sera passado para a funcao "println"
+            std::vector<std::shared_ptr<ASTNode>> argument_nodes; 
+            this->lista_args(symbol_local_table, arguments, argument_nodes);
+
+            // Adicionando o comando PRINTLN na arvore
+            auto println_node = std::make_shared<compiler::PrintNode>();
+            
+            // Adicionar os argumentos da chamda de funcao
+            for(auto child : argument_nodes){
+                println_node->set_argument(child);
+            }
+
 
             this->match(compiler::TokenType::RBRACKET);
             this->match(compiler::TokenType::SEMICOLON);
+
+            return println_node;
         }else if(this->tokens[this->index].type == compiler::TokenType::RETURN){
             this->match(compiler::TokenType::RETURN);
             this->expr(symbol_local_table);
@@ -351,6 +373,8 @@ namespace compiler {
             std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
         }
+
+        return nullptr;
     }
     std::shared_ptr<compiler::ASTNode> Parser::atribuicao_ou_chamada(compiler::SymbolTable &symbol_local_table, std::string &id_lexeme){
         if(this->tokens[this->index].type == compiler::TokenType::ASSIGN){
@@ -360,19 +384,26 @@ namespace compiler {
             
             if(!symbol_local_table.find(id_lexeme)){
                 std::cout << "A variavel " << "'" << id_lexeme << "'" <<  " nao foi declarada ou passada por parametros\n";
-            }else{
-                auto id_knot = std::make_shared<compiler::IdNode>(id_lexeme);
-                auto assign_node = std::make_shared<compiler::AssignNode>();
-                assign_node->set_assignment(id_knot, expr_return);
-                return assign_node;
             }
+             
+            auto id_knot = std::make_shared<compiler::IdNode>(id_lexeme);
+            auto assign_node = std::make_shared<compiler::AssignNode>();
+            assign_node->set_assignment(id_knot, expr_return);
+            return assign_node;
         }else if(this->tokens[this->index].type == compiler::TokenType::LBRACKET){
             this->match(compiler::TokenType::LBRACKET);
 
             std::vector<std::string> arguments;
-            this->lista_args(symbol_local_table, arguments);
+            std::vector<std::shared_ptr<ASTNode>> argument_nodes;
+            this->lista_args(symbol_local_table, arguments, argument_nodes);
 
-            //
+            // Criar o node de chamada de funcao
+            auto call_node = std::make_shared<CallNode>(id_lexeme);
+            
+            // Adicionar os argumentos da chamda de funcao
+            for(auto child : argument_nodes){
+                call_node->add_argument(child);
+            }
 
             this->match(compiler::TokenType::RBRACKET);
             this->match(compiler::TokenType::SEMICOLON);
@@ -393,6 +424,7 @@ namespace compiler {
                symbol_local_table.insert(
                     std::move((*symbol_entry))
                 );
+                
             }else{
                 compiler::SymbolEntry symbol_entry_local(id_lexeme, (*temp_symbol_table).get_return_type(), false, -1);
                 symbol_entry_local.add_function_call(function_register);
@@ -400,6 +432,8 @@ namespace compiler {
                         std::move((symbol_entry_local))
                 );                
             }
+
+            return call_node;
         }else if(!this->error){
             std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
             this->tokens[this->index].lexeme << " nao esperado na entrada\n";
@@ -621,11 +655,9 @@ namespace compiler {
         if(this->tokens[this->index].type == compiler::TokenType::ID){
             // lexema do id atual avaliado para verificao se eh ou nao uma funcao 
             std::string id_lexeme = this->tokens[this->index].lexeme;
-
-            leaf_knot = std::make_shared<compiler::IdNode>(id_lexeme);
-
             this->match(compiler::TokenType::ID);
-            this->chamada_funcao(symbol_local_table, id_lexeme);
+
+            leaf_knot = this->chamada_funcao(symbol_local_table, id_lexeme);
         }else if(this->tokens[this->index].type == compiler::TokenType::INT_CONST){
             leaf_knot = std::make_shared<compiler::IntConstNode>(std::stoi(this->tokens[this->index].lexeme));
             this->match(compiler::TokenType::INT_CONST);
@@ -646,13 +678,22 @@ namespace compiler {
 
         return leaf_knot;
     }
-    void Parser::chamada_funcao(compiler::SymbolTable &symbol_local_table, std::string &id_lexeme){
+    std::shared_ptr<compiler::ASTNode> Parser::chamada_funcao(compiler::SymbolTable &symbol_local_table, std::string &id_lexeme){
         if(this->tokens[this->index].type == compiler::TokenType::LBRACKET){
             
             this->match(compiler::TokenType::LBRACKET);
             
             std::vector<std::string> arguments;
-            this->lista_args(symbol_local_table, arguments);
+            std::vector<std::shared_ptr<ASTNode>> argument_nodes;
+            this->lista_args(symbol_local_table, arguments, argument_nodes);
+
+             // Criar o node de chamada de funcao
+            auto call_node = std::make_shared<CallNode>(id_lexeme);
+            
+            // Adicionar os argumentos da chamda de funcao
+            for(auto child : argument_nodes){
+                call_node->add_argument(child);
+            }
             
             this->match(compiler::TokenType::RBRACKET);
             
@@ -679,53 +720,69 @@ namespace compiler {
                         std::move((symbol_entry_local))
                 );                
             }
+
+            return call_node;
         }else{
             // Caso seja um identificado e nao uma chamada de funcao
             if(!symbol_local_table.find(id_lexeme)){
                 std::cout << "A VARIAVEL " << "'" << id_lexeme << "'" << " nao foi declarada nem passada por parametros\n";
             }
         }
+        
+        return std::make_shared<compiler::IdNode>(id_lexeme);
     }
-    void Parser::lista_args(compiler::SymbolTable &symbol_local_table, std::vector<std::string> &arguments){
+    void Parser::lista_args(compiler::SymbolTable &symbol_local_table, std::vector<std::string> &arguments, std::vector<std::shared_ptr<ASTNode>>& argument_nodes){
         if(this->tokens[this->index].type == compiler::TokenType::ID ||
             this->tokens[this->index].type == compiler::TokenType::INT_CONST ||
             this->tokens[this->index].type == compiler::TokenType::FLOAT_CONST ||
             this->tokens[this->index].type == compiler::TokenType::CHAR_LITERAL){
-                this->arg(symbol_local_table, arguments);
-                this->lista_args2(symbol_local_table, arguments);
+                this->arg(symbol_local_table, arguments, argument_nodes);
+                this->lista_args2(symbol_local_table, arguments, argument_nodes);
         }
     }
-    void Parser::lista_args2(compiler::SymbolTable &symbol_local_table, std::vector<std::string> &arguments){
+    void Parser::lista_args2(compiler::SymbolTable &symbol_local_table, std::vector<std::string> &arguments, std::vector<std::shared_ptr<ASTNode>>& argument_nodes){
         if(this->tokens[this->index].type == compiler::TokenType::COMMA){
             this->match(compiler::TokenType::COMMA);
-            this->arg(symbol_local_table, arguments);
-            this->lista_args2(symbol_local_table, arguments);
+            this->arg(symbol_local_table, arguments, argument_nodes);
+            this->lista_args2(symbol_local_table, arguments, argument_nodes);
         }
     }
-    void Parser::arg(compiler::SymbolTable &symbol_local_table, std::vector<std::string> &arguments){
+    void Parser::arg(compiler::SymbolTable &symbol_local_table, std::vector<std::string> &arguments, std::vector<std::shared_ptr<ASTNode>>& argument_nodes){
         std::string arg_lexeme = "";
+        std::shared_ptr<compiler::ASTNode> arg_node;
         if(this->tokens[this->index].type == compiler::TokenType::ID){
             // lexema do id atual da chamada para possivel chamada de funcao 
             std::string id_lexeme = this->tokens[this->index].lexeme;
             
+            this->match(compiler::TokenType::ID);
+            
             // Pegando o lexema do argumento atual
             arg_lexeme = id_lexeme;
+            // Pegando o node do ID
+            arg_node = this->chamada_funcao(symbol_local_table, id_lexeme);
 
-            this->match(compiler::TokenType::ID);
-            this->chamada_funcao(symbol_local_table, id_lexeme);
         }else if(this->tokens[this->index].type == compiler::TokenType::INT_CONST){
             // Pegando o lexema do argumento atual
             arg_lexeme = this->tokens[this->index].lexeme;
+
+            // Pegando o node do ID
+            arg_node = std::make_shared<IntConstNode>(std::stoi(arg_lexeme));
 
             this->match(compiler::TokenType::INT_CONST);
         }else if (this->tokens[this->index].type == compiler::TokenType::FLOAT_CONST){
             // Pegando o lexema do argumento atual
             arg_lexeme = this->tokens[this->index].lexeme;
+
+            // Pegando o node do ID
+            arg_node = std::make_shared<FloatConstNode>(std::stof(arg_lexeme));
           
             this->match(compiler::TokenType::FLOAT_CONST);
         }else if (this->tokens[this->index].type == compiler::TokenType::CHAR_LITERAL){
             // Pegando o lexema do argumento atual
             arg_lexeme = this->tokens[this->index].lexeme;
+
+            // Pegando o node do ID
+            arg_node = std::make_shared<CharConstNode>(arg_lexeme[0]);
           
             this->match(compiler::TokenType::CHAR_LITERAL);
         }else if(!this->error){
@@ -734,5 +791,6 @@ namespace compiler {
         }
 
         arguments.push_back(arg_lexeme);
+        argument_nodes.push_back(arg_node);
     }
 }
