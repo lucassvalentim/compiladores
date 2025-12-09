@@ -2,14 +2,11 @@
 
 namespace compiler {
 
-    bool SymbolTable::insert(const SymbolEntry &entry) {
-        // Verifica se o símbolo já existe
-        if (symbols_.find(entry.name) != symbols_.end()) {
-            return false; // já existe
-        }
-        symbols_[entry.name] = entry;
-        return true;
-    }
+    bool SymbolTable::insert(SymbolEntry &&entry) {
+        // try_emplace com std::move
+        auto [it, inserted] = symbols_.try_emplace(entry.name, std::move(entry));
+        return inserted;
+    }   
 
     std::optional<SymbolEntry> SymbolTable::find(const std::string &name) const {
         auto it = symbols_.find(name);
@@ -19,14 +16,13 @@ namespace compiler {
         return std::nullopt;
     }
 
-    bool SymbolTableList::insert_table(const std::string &scope_name, const SymbolTable &table) {
-        // Verifica se já existe uma tabela com esse escopo
-        if (tables_.find(scope_name) != tables_.end()) {
-            return false; // já existe
-        }
-        tables_[scope_name] = table;
-        return true;
+    bool SymbolTableList::insert_table(const std::string &scope_name, SymbolTable &&table) {
+    if (tables_.find(scope_name) != tables_.end()) {
+        return false;
     }
+    tables_[scope_name] = std::move(table);  // Move em vez de copiar
+    return true;
+}
 
     std::optional<SymbolTable> SymbolTableList::find_table(const std::string &scope_name) const {
         auto it = tables_.find(scope_name);

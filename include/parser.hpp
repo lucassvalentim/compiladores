@@ -19,12 +19,12 @@ namespace compiler{
 
             void match(compiler::TokenType tok);
             void programa();
-            void funcao_seq(compiler::SymbolTable &st);
-            compiler::SymbolTable funcao();
+            void funcao_seq();
+            void funcao();
             void nome_funcao();
             std::optional<std::vector<std::pair<std::string, compiler::DataType>>> lista_params();
             void lista_params2(std::vector<std::pair<std::string, compiler::DataType>> &list_ids);
-            void tipo_retorno_funcao();
+            compiler::DataType tipo_retorno_funcao();
             void bloco(compiler::SymbolTable &st);
             void sequencia(compiler::SymbolTable &st);
             void declaracao(compiler::SymbolTable &st);
