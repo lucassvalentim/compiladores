@@ -88,7 +88,6 @@ namespace compiler {
     // Descida recursiva
     void Parser::programa(){
         if(this->tokens[this->index].type == compiler::TokenType::FUNCTION){
-            std::cout << "entrou\n";
             this->funcao();
             this->funcao_seq();
             if(this->tokens[this->index].type == compiler::TokenType::END_OF_FILE){
@@ -123,24 +122,20 @@ namespace compiler {
             // Inserion a lista de parametros na tabela de simbolos
             std::optional<std::vector<std::pair<std::string, compiler::DataType>>> list_ids = this->lista_params();
             
-            if(!list_ids){
-                std::cout << "Erro ao inserir a lista de parametros\n";
-            }
-
-            int pos_param = 0;
-            for(auto ids : *list_ids){
-                std::cout << ids.first << ' ' << (int)ids.second << ' ' << pos_param << std::endl;
-                symbol_local_table.insert(
-                    compiler::SymbolEntry(ids.first, ids.second, true, pos_param)
-                );
-                pos_param = pos_param + 1;
+            if(list_ids){
+                int pos_param = 0;
+                for(auto ids : *list_ids){
+                    symbol_local_table.insert(
+                        compiler::SymbolEntry(ids.first, ids.second, true, pos_param)
+                    );
+                    pos_param = pos_param + 1;
+                }
             }
 
             this->match(compiler::TokenType::RBRACKET);
 
             // Recupera o tipo de retorno da funcao
             DataType return_type = this->tipo_retorno_funcao();
-            std::cout << "Foi pego o tipo de retorno da funcao\n";
             symbol_local_table.set_return_type(return_type);
             
             this->bloco(symbol_local_table);
@@ -167,6 +162,7 @@ namespace compiler {
         std::vector<std::pair<std::string, compiler::DataType>> list_ids;
         if(this->tokens[this->index].type == compiler::TokenType::ID){
 
+            // Captura do lexema do ID identificado para criar lista de parametros
             std::string id_lexeme = this->tokens[this->index].lexeme;
             
             this->match(compiler::TokenType::ID);
@@ -241,19 +237,16 @@ namespace compiler {
             // recupera o tipo de todos os ids
             compiler::DataType type_all_ids = this->type();
             
-            if(!list_ids){
-                std::cout << "Erro ao declarar as variáveis\n";
-                return;
-            }
-
-            for(auto lexeme : *list_ids){
-                
-                if(!symbol_local_table.find(lexeme)){
-                    symbol_local_table.insert(
-                        compiler::SymbolEntry(lexeme, type_all_ids, false, -1)
-                    );
-                }else{
-                    std::cout << "A variavel " << "'" << lexeme << "'" << " ja foi declarada\n";
+            // Adiciona na tabela de simbolos todas as variaveis declaradas
+            if(list_ids){
+                for(auto lexeme : *list_ids){
+                    if(!symbol_local_table.find(lexeme)){
+                        symbol_local_table.insert(
+                            compiler::SymbolEntry(lexeme, type_all_ids, false, -1)
+                        );
+                    }else{
+                        std::cout << "A variavel " << "'" << lexeme << "'" << " ja foi declarada\n";
+                    }
                 }
             }
 
@@ -266,6 +259,7 @@ namespace compiler {
     std::optional<std::vector<std::string>> Parser::var_list(){
         std::vector<std::string> list_ids;
         if(this->tokens[this->index].type == compiler::TokenType::ID){
+
             // Lista que armazenará todos os ids encontrados na declaracao
             list_ids.push_back(this->tokens[this->index].lexeme);
 
@@ -313,10 +307,6 @@ namespace compiler {
     }
     void Parser::comando(compiler::SymbolTable &symbol_local_table){
         if(this->tokens[this->index].type == compiler::TokenType::ID){
-            if(!symbol_local_table.find(this->tokens[this->index].lexeme)){
-                std::cout << "A variavel " << "'" << this->tokens[this->index].lexeme << "'" <<  " nao foi declarada ou passada por parametros\n";
-            }
-
             std::string id_lexeme = this->tokens[this->index].lexeme;
             
             this->match(compiler::TokenType::ID);
@@ -353,6 +343,10 @@ namespace compiler {
     }
     void Parser::atribuicao_ou_chamada(compiler::SymbolTable &symbol_local_table, std::string &id_lexeme){
         if(this->tokens[this->index].type == compiler::TokenType::ASSIGN){
+            if(!symbol_local_table.find(id_lexeme)){
+                std::cout << "A variavel " << "'" << id_lexeme << "'" <<  " nao foi declarada ou passada por parametros\n";
+            }
+
             this->match(compiler::TokenType::ASSIGN);
             this->expr(symbol_local_table);
             this->match(compiler::TokenType::SEMICOLON);
@@ -364,8 +358,6 @@ namespace compiler {
 
             this->match(compiler::TokenType::RBRACKET);
             this->match(compiler::TokenType::SEMICOLON);
-
-            std::cout << "\nQuantidade de arguementos da funcao " << id_lexeme << ": " << arguments.size() << std::endl;
 
             // Criacao do function registe na funcao chamada
             compiler::FunctionRegister function_register(id_lexeme, arguments);
@@ -379,22 +371,16 @@ namespace compiler {
              // Inserir na tabela a chamada de funcao
             std::optional<compiler::SymbolEntry> symbol_entry = symbol_local_table.find(id_lexeme);
             if(symbol_entry){
-                std::cout << "\nqtd3 call size: " << (*symbol_entry).calls.size() << '\n';
                (*symbol_entry).add_function_call(function_register);
-                std::cout << "\nqtd4 call size: " << (*symbol_entry).calls.size() << '\n';
                symbol_local_table.insert(
                     std::move((*symbol_entry))
                 );
-                std::cout << "\nqtd5 call size: " << (*symbol_local_table.find(id_lexeme)).calls.size() << '\n';
             }else{
                 compiler::SymbolEntry symbol_entry_local(id_lexeme, (*temp_symbol_table).get_return_type(), false, -1);
                 symbol_entry_local.add_function_call(function_register);
-                std::cout << "\nqtd1 call size: " << symbol_entry_local.calls.size() << '\n';
                 symbol_local_table.insert(
                         std::move((symbol_entry_local))
-                );
-                std::cout << "\nqtd2 call size: " << (*symbol_local_table.find(id_lexeme)).calls.size() << '\n';
-                
+                );                
             }
         }else if(!this->error){
             std::cout << "Erro sintatico na linha " << this->tokens[this->index].lineNumber << ": " <<
@@ -552,10 +538,6 @@ namespace compiler {
     }
     void Parser::fator(compiler::SymbolTable &symbol_local_table){
         if(this->tokens[this->index].type == compiler::TokenType::ID){
-            if(!symbol_local_table.find(this->tokens[this->index].lexeme)){
-                std::cout << "A variavel " << "'" << this->tokens[this->index].lexeme << "'" << " nao foi declarada nem passada por parametros\n";
-            }
-
             // lexema do id atual avaliado para verificao se eh ou nao uma funcao 
             std::string id_lexeme = this->tokens[this->index].lexeme;
 
@@ -595,26 +577,24 @@ namespace compiler {
                 std::cout << "Nao foi possivel recuperar a tabela de simbos\n";
             }
             
-            std::cout << "\nQuantidade de arguementos da funcao " << id_lexeme << ": " << arguments.size() << std::endl;
             // Inserir na tabela a chamada de funcao
             std::optional<compiler::SymbolEntry> symbol_entry = symbol_local_table.find(id_lexeme);
             if(symbol_entry){
-                std::cout << "\nqtd3 call size: " << (*symbol_entry).calls.size() << '\n';
                (*symbol_entry).add_function_call(function_register);
-                std::cout << "\nqtd4 call size: " << (*symbol_entry).calls.size() << '\n';
                symbol_local_table.insert(
                     std::move((*symbol_entry))
                 );
-                std::cout << "\nqtd5 call size: " << (*symbol_local_table.find(id_lexeme)).calls.size() << '\n';
             }else{
                 compiler::SymbolEntry symbol_entry_local(id_lexeme, (*temp_symbol_table).get_return_type(), false, -1);
                 symbol_entry_local.add_function_call(function_register);
-                std::cout << "\nqtd1 call size: " << symbol_entry_local.calls.size() << '\n';
                 symbol_local_table.insert(
                         std::move((symbol_entry_local))
-                );
-                std::cout << "\nqtd2 call size: " << (*symbol_local_table.find(id_lexeme)).calls.size() << '\n';
-                
+                );                
+            }
+        }else{
+            // Caso seja um identificado e nao uma chamada de funcao
+            if(!symbol_local_table.find(id_lexeme)){
+                std::cout << "A VARIAVEL " << "'" << id_lexeme << "'" << " nao foi declarada nem passada por parametros\n";
             }
         }
     }
@@ -637,10 +617,6 @@ namespace compiler {
     void Parser::arg(compiler::SymbolTable &symbol_local_table, std::vector<std::string> &arguments){
         std::string arg_lexeme = "";
         if(this->tokens[this->index].type == compiler::TokenType::ID){
-            if(!symbol_local_table.find(this->tokens[this->index].lexeme)){
-                std::cout << "A variavel " << "'" << this->tokens[this->index].lexeme << "'" << " nao foi declarada nem passada por parametros\n";
-            }
-
             // lexema do id atual da chamada para possivel chamada de funcao 
             std::string id_lexeme = this->tokens[this->index].lexeme;
             
