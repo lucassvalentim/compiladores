@@ -1,4 +1,7 @@
--> Inicio da Analise Lexica:
+
+========================================
+       INICIO DA ANALISE LEXICA
+========================================
 
 lexema: "fn"
 Token Type: FUNCTION
@@ -140,9 +143,15 @@ lexema: "EOF"
 Token Type: END_OF_FILE
 Line Number: 8
 
-Fim da Analise Lexica
 
--> Inicio da Analise Sintatica:
+========================================
+       FIM DA ANALISE LEXICA
+========================================
+
+
+========================================
+      INICIO DA ANALISE SINTATICA
+========================================
 
 Token: FUNCTION reconhecido na entrada
 Token: MAIN reconhecido na entrada

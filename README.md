@@ -1,13 +1,20 @@
 # Nome dos participantes:
 
-    1) Lucas Henrique Valentim Rocha
+1) **Lucas Henrique Valentim Rocha**\
+2) **Isabelle Cristine do Carmo Matos**
 
-    2) Isabelle Cristine do Carmo Matos
+# Front-end do Compilador --- Linguagem P
 
-# Analisador Léxico e Sintático — Linguagem P
+Este projeto implementa o **front-end completo** de um compilador para a
+**linguagem P**, incluindo:
 
-Este projeto implementa o **analisador léxico e sintático** de um compilador para a **linguagem P**.
-O analisador é responsável por identificar e classificar os tokens presentes no código-fonte, servindo como a primeira etapa do processo de compilação.
+- **Analisador Léxico**
+- **Analisador Sintático**
+- **Analisador Semântico** (verifica regras semânticas
+  que envolvem declarações)
+- **Gerador de Código Intermediário**, representado por uma **AST
+  (Abstract Syntax Tree)**
+
 
 ---
 
@@ -15,31 +22,34 @@ O analisador é responsável por identificar e classificar os tokens presentes n
 
 ### 1. Compilação
 
-Para compilar o projeto, basta executar o comando:
+Para compilar o projeto, basta executar:
 
 ```bash
 make
 ```
 
-Esse comando irá gerar um executável chamado **`main`** na pasta raiz do projeto.
+Isso irá gerar um executável chamado **`main`** na pasta raiz do
+projeto.
 
 ---
 
 ### 2. Execução
 
-Para executar o analisador léxico, utilize o seguinte formato:
+Para rodar o compilador (front-end) sobre um arquivo `.p`, utilize:
 
 ```bash
 ./main inputs/<nome_do_arquivo>.p
 ```
 
-O resultado da análise será impresso diretamente no **terminal**.
+O resultado da análise léxica, sintática, semântica e a representação da
+**AST** será impresso diretamente no **terminal**.
 
 ---
 
 ### 3. Salvando a saída em arquivo
 
-Caso queira salvar a saída em um arquivo `.txt` dentro da pasta `outputs`, execute o comando:
+Para salvar toda a saída (tokens, árvore sintática e mensagens
+semânticas) em um arquivo `.txt`, execute:
 
 ```bash
 ./main inputs/<nome_do_arquivo>.p > outputs/<nome_arquivo_saida>.txt
@@ -49,20 +59,22 @@ Caso queira salvar a saída em um arquivo `.txt` dentro da pasta `outputs`, exec
 
 ## 📁 Estrutura de diretórios
 
-O projeto já contém exemplos prontos para teste:
+O projeto contém arquivos de exemplo já prontos para teste:
 
-```
-inputs/   → arquivos de entrada (.p)
-outputs/  → arquivos de saída (.txt)
-```
+    inputs/   → arquivos de entrada (.p)
+    outputs/  → arquivos de saída (.txt)
 
-Para cada arquivo de entrada na pasta `inputs`, há um arquivo de saída correspondente na pasta `outputs`, contendo o resultado gerado pelo analisador.
+Para cada arquivo dentro de `inputs`, há uma saída correspondente em
+`outputs`, contendo:
+
+- Tokens identificados
+- Estrutura sintática
+- Verificações semânticas
+- AST resultante
 
 **Exemplo:**
 
-```
-inputs/soma.p  →  outputs/soma.txt
-```
+    inputs/soma.p  →  outputs/soma.txt
 
 ---
 
@@ -82,11 +94,12 @@ ou salvando o resultado:
 
 ## Requisitos
 
-- Compilador **C++** compatível com o padrão **C++11** ou superior
+- Compilador **C++** compatível com o padrão **C++11** ou superior\
 - **make** instalado no sistema
 
 ---
 
 ## 📄 Licença
 
-Este projeto é de uso acadêmico e foi desenvolvido para fins de estudo e demonstração de técnicas de análise léxica.
+Este projeto foi desenvolvido para fins acadêmicos como demonstração
+prática do funcionamento do front-end de um compilador.

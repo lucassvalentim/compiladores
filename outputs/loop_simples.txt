@@ -1,4 +1,7 @@
--> Inicio da Analise Lexica:
+
+========================================
+       INICIO DA ANALISE LEXICA
+========================================
 
 lexema: "fn"
 Token Type: FUNCTION
@@ -64,8 +67,8 @@ lexema: "i"
 Token Type: ID
 Line Number: 4
 
-lexema: "<"
-Token Type: LT
+lexema: ">="
+Token Type: GE
 Line Number: 4
 
 lexema: "10"
@@ -140,9 +143,15 @@ lexema: "EOF"
 Token Type: END_OF_FILE
 Line Number: 8
 
-Fim da Analise Lexica
 
--> Inicio da Analise Sintatica:
+========================================
+       FIM DA ANALISE LEXICA
+========================================
+
+
+========================================
+      INICIO DA ANALISE SINTATICA
+========================================
 
 Token: FUNCTION reconhecido na entrada
 Token: MAIN reconhecido na entrada
@@ -160,7 +169,7 @@ Token: INT_CONST reconhecido na entrada
 Token: SEMICOLON reconhecido na entrada
 Token: WHILE reconhecido na entrada
 Token: ID reconhecido na entrada
-Token: LT reconhecido na entrada
+Token: GE reconhecido na entrada
 Token: INT_CONST reconhecido na entrada
 Token: LBRACE reconhecido na entrada
 Token: PRINTLN reconhecido na entrada
@@ -180,10 +189,83 @@ Token: RBRACE reconhecido na entrada
 Token: RBRACE reconhecido na entrada
 Token: END_OF_FILE reconhecido na entrada
 
-Fim da Analise Sintatica
+========================================
+        FIM DA ANALISE SINTATICA
+========================================
 
-==================== Tabela de simbolos ====================
-Existem 1 tabelas de simbolos
-Tabela de simbolos da main: []
+╔════════════════════════════════════════╗
+║     TABELA DE SIMBOLOS - RESUMO       ║
+╚════════════════════════════════════════╝
+  Total de tabelas: 1
 
-=============================================================
+┌────────────────────────────────────────┐
+│ ESCOPO: main                        │
+├────────────────────────────────────────┤
+│ [1] println                         │
+│     Tipo: void                       │
+│     Parametro: Nao                   │
+├────────────────────────────────────────┤
+│ [2] i                               │
+│     Tipo: int                        │
+│     Parametro: Nao                   │
+├────────────────────────────────────────┤
+│ TIPO DE RETORNO: void                │
+└────────────────────────────────────────┘
+
+========================================
+      FIM DA TABELA DE SIMBOLOS
+========================================
+
+
+╔════════════════════════════════════════╗
+║     ARVORE SINTATICA ABSTRATA          ║
+╚════════════════════════════════════════╝
+
+
+┌─ FUNCTION: main
+│  Tipo retorno: void
+  ┌─ BLOCK (2 comandos)
+  │  [1]
+    ┌─ ASSIGN
+    │  ID (esquerda):
+      ● ID: i
+    │  Expressao (direita):
+      ● INT_CONST: 0
+    └─ END ASSIGN
+  │  [2]
+    ┌─ WHILE
+    │  Condicao:
+      ┌─ REL_OP: >=
+      │  Operando esquerdo:
+        ● ID: i
+      │  Operando direito:
+        ● INT_CONST: 10
+      └─ END REL_OP
+    │  Corpo:
+      ┌─ BLOCK (2 comandos)
+      │  [1]
+        ┌─ PRINTLN
+        │  Argumento:
+          ● ID: i
+        └─ END PRINTLN
+      │  [2]
+        ┌─ ASSIGN
+        │  ID (esquerda):
+          ● ID: i
+        │  Expressao (direita):
+          ┌─ ARIT_OP: +
+          │  Operando esquerdo:
+            ● ID: i
+          │  Operando direito:
+            ● INT_CONST: 1
+          └─ END ARIT_OP
+        └─ END ASSIGN
+      └─ END BLOCK
+    └─ END WHILE
+  └─ END BLOCK
+└─ END FUNCTION
+
+
+========================================
+   FIM DA ARVORE SINTATICA ABSTRATA
+========================================

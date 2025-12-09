@@ -1,4 +1,7 @@
--> Inicio da Analise Lexica:
+
+========================================
+       INICIO DA ANALISE LEXICA
+========================================
 
 lexema: "fn"
 Token Type: FUNCTION
@@ -196,9 +199,15 @@ lexema: "EOF"
 Token Type: END_OF_FILE
 Line Number: 9
 
-Fim da Analise Lexica
 
--> Inicio da Analise Sintatica:
+========================================
+       FIM DA ANALISE LEXICA
+========================================
+
+
+========================================
+      INICIO DA ANALISE SINTATICA
+========================================
 
 Token: FUNCTION reconhecido na entrada
 Token: MAIN reconhecido na entrada
@@ -250,10 +259,106 @@ Token: SEMICOLON reconhecido na entrada
 Token: RBRACE reconhecido na entrada
 Token: END_OF_FILE reconhecido na entrada
 
-Fim da Analise Sintatica
+========================================
+        FIM DA ANALISE SINTATICA
+========================================
 
-==================== Tabela de simbolos ====================
-Existem 1 tabelas de simbolos
-Tabela de simbolos da main: []
+╔════════════════════════════════════════╗
+║     TABELA DE SIMBOLOS - RESUMO       ║
+╚════════════════════════════════════════╝
+  Total de tabelas: 1
 
-=============================================================
+┌────────────────────────────────────────┐
+│ ESCOPO: main                        │
+├────────────────────────────────────────┤
+│ [1] c                               │
+│     Tipo: float                      │
+│     Parametro: Nao                   │
+├────────────────────────────────────────┤
+│ [2] b                               │
+│     Tipo: float                      │
+│     Parametro: Nao                   │
+├────────────────────────────────────────┤
+│ [3] println                         │
+│     Tipo: void                       │
+│     Parametro: Nao                   │
+├────────────────────────────────────────┤
+│ [4] media                           │
+│     Tipo: float                      │
+│     Parametro: Nao                   │
+├────────────────────────────────────────┤
+│ [5] a                               │
+│     Tipo: float                      │
+│     Parametro: Nao                   │
+├────────────────────────────────────────┤
+│ TIPO DE RETORNO: void                │
+└────────────────────────────────────────┘
+
+========================================
+      FIM DA TABELA DE SIMBOLOS
+========================================
+
+
+╔════════════════════════════════════════╗
+║     ARVORE SINTATICA ABSTRATA          ║
+╚════════════════════════════════════════╝
+
+
+┌─ FUNCTION: main
+│  Tipo retorno: void
+  ┌─ BLOCK (5 comandos)
+  │  [1]
+    ┌─ ASSIGN
+    │  ID (esquerda):
+      ● ID: a
+    │  Expressao (direita):
+      ● FLOAT_CONST: 8
+    └─ END ASSIGN
+  │  [2]
+    ┌─ ASSIGN
+    │  ID (esquerda):
+      ● ID: b
+    │  Expressao (direita):
+      ● FLOAT_CONST: 6
+    └─ END ASSIGN
+  │  [3]
+    ┌─ ASSIGN
+    │  ID (esquerda):
+      ● ID: c
+    │  Expressao (direita):
+      ● FLOAT_CONST: 7
+    └─ END ASSIGN
+  │  [4]
+    ┌─ ASSIGN
+    │  ID (esquerda):
+      ● ID: media
+    │  Expressao (direita):
+      ┌─ ARIT_OP: /
+      │  Operando esquerdo:
+        ┌─ ARIT_OP: +
+        │  Operando esquerdo:
+          ┌─ ARIT_OP: +
+          │  Operando esquerdo:
+            ● ID: a
+          │  Operando direito:
+            ● ID: b
+          └─ END ARIT_OP
+        │  Operando direito:
+          ● ID: c
+        └─ END ARIT_OP
+      │  Operando direito:
+        ● FLOAT_CONST: 3
+      └─ END ARIT_OP
+    └─ END ASSIGN
+  │  [5]
+    ┌─ PRINTLN
+    │  Argumento:
+      ● ID: media
+    └─ END PRINTLN
+  └─ END BLOCK
+└─ END FUNCTION
+
+
+========================================
+   FIM DA ARVORE SINTATICA ABSTRATA
+========================================

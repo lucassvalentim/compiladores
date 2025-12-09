@@ -1,4 +1,7 @@
--> Inicio da Analise Lexica:
+
+========================================
+       INICIO DA ANALISE LEXICA
+========================================
 
 lexema: "fn"
 Token Type: FUNCTION
@@ -240,9 +243,15 @@ lexema: "EOF"
 Token Type: END_OF_FILE
 Line Number: 12
 
-Fim da Analise Lexica
 
--> Inicio da Analise Sintatica:
+========================================
+       FIM DA ANALISE LEXICA
+========================================
+
+
+========================================
+      INICIO DA ANALISE SINTATICA
+========================================
 
 Token: FUNCTION reconhecido na entrada
 Token: ID reconhecido na entrada
@@ -305,11 +314,127 @@ Token: SEMICOLON reconhecido na entrada
 Token: RBRACE reconhecido na entrada
 Token: END_OF_FILE reconhecido na entrada
 
-Fim da Analise Sintatica
+========================================
+        FIM DA ANALISE SINTATICA
+========================================
 
-==================== Tabela de simbolos ====================
-Existem 2 tabelas de simbolos
-Tabela de simbolos da main: []
-Tabela de simbolos da soma: []
+╔════════════════════════════════════════╗
+║     TABELA DE SIMBOLOS - RESUMO       ║
+╚════════════════════════════════════════╝
+  Total de tabelas: 2
 
-=============================================================
+┌────────────────────────────────────────┐
+│ ESCOPO: main                        │
+├────────────────────────────────────────┤
+│ [1] soma                            │
+│     Tipo: int                        │
+│     Parametro: Nao                   │
+│                                        │
+│     Chamadas referenciadas:            │
+│       -> soma                       │
+│          Args(2): [b, c]            │
+├────────────────────────────────────────┤
+│ [2] c                               │
+│     Tipo: int                        │
+│     Parametro: Nao                   │
+├────────────────────────────────────────┤
+│ [3] b                               │
+│     Tipo: int                        │
+│     Parametro: Nao                   │
+├────────────────────────────────────────┤
+│ [4] println                         │
+│     Tipo: void                       │
+│     Parametro: Nao                   │
+├────────────────────────────────────────┤
+│ [5] a                               │
+│     Tipo: int                        │
+│     Parametro: Nao                   │
+├────────────────────────────────────────┤
+│ TIPO DE RETORNO: void                │
+└────────────────────────────────────────┘
+
+┌────────────────────────────────────────┐
+│ ESCOPO: soma                        │
+├────────────────────────────────────────┤
+│ [1] y                               │
+│     Tipo: int                        │
+│     Parametro: Sim                   │
+│     Posicao param: 1                 │
+├────────────────────────────────────────┤
+│ [2] x                               │
+│     Tipo: int                        │
+│     Parametro: Sim                   │
+│     Posicao param: 0                 │
+├────────────────────────────────────────┤
+│ TIPO DE RETORNO: int                 │
+└────────────────────────────────────────┘
+
+========================================
+      FIM DA TABELA DE SIMBOLOS
+========================================
+
+
+╔════════════════════════════════════════╗
+║     ARVORE SINTATICA ABSTRATA          ║
+╚════════════════════════════════════════╝
+
+
+┌─ FUNCTION: main
+│  Tipo retorno: void
+  ┌─ BLOCK (4 comandos)
+  │  [1]
+    ┌─ ASSIGN
+    │  ID (esquerda):
+      ● ID: b
+    │  Expressao (direita):
+      ● INT_CONST: 40
+    └─ END ASSIGN
+  │  [2]
+    ┌─ ASSIGN
+    │  ID (esquerda):
+      ● ID: c
+    │  Expressao (direita):
+      ● INT_CONST: 39
+    └─ END ASSIGN
+  │  [3]
+    ┌─ ASSIGN
+    │  ID (esquerda):
+      ● ID: a
+    │  Expressao (direita):
+      ┌─ CALL: soma
+      │  Numero de argumentos: 2
+      │  Arg[0]:
+        ● ID: b
+      │  Arg[1]:
+        ● ID: c
+      └─ END CALL
+    └─ END ASSIGN
+  │  [4]
+    ┌─ PRINTLN
+    │  Argumento:
+      ● ID: a
+    └─ END PRINTLN
+  └─ END BLOCK
+└─ END FUNCTION
+
+
+┌─ FUNCTION: soma
+│  Tipo retorno: int
+  ┌─ BLOCK (1 comandos)
+  │  [1]
+    ┌─ RETURN
+    │  Expressao:
+      ┌─ ARIT_OP: +
+      │  Operando esquerdo:
+        ● ID: x
+      │  Operando direito:
+        ● ID: y
+      └─ END ARIT_OP
+    └─ END RETURN
+  └─ END BLOCK
+└─ END FUNCTION
+
+
+========================================
+   FIM DA ARVORE SINTATICA ABSTRATA
+========================================
