@@ -102,7 +102,7 @@ namespace compiler {
                 return *this;
             }
             
-            // Destrutor (se não precisa de lógica especial, pode ser omitido)
+            // Destrutor
             ~SymbolTable() = default;
 
             bool insert(SymbolEntry &&entry);
@@ -116,12 +116,12 @@ namespace compiler {
     };
 
     class SymbolTableList {
-    public:
-        bool insert_table(const std::string &scope_name, SymbolTable &&table);
-        std::optional<SymbolTable> find_table(const std::string &scope_name) const;
-        const std::unordered_map<std::string, SymbolTable>& get_all() const { return tables_; }
-    private:
-        std::unordered_map<std::string, SymbolTable> tables_;
+        public:
+            bool insert_table(const std::string &scope_name, SymbolTable &&table);
+            std::optional<SymbolTable> find_table(const std::string &scope_name) const;
+            const std::unordered_map<std::string, SymbolTable>& get_all() const { return tables_; }
+        private:
+            std::unordered_map<std::string, SymbolTable> tables_;
     };
 
 }
